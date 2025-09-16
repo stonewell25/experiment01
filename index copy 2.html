@@ -7,83 +7,82 @@
     <style>
         /* CSS (デザイン) */
         body {
-            font-family: sans-serif; display: flex;
-            justify-content: center; align-items: center;
-            flex-direction: column; min-height: 100vh;
-            margin: 0; padding: 20px 0; background-color: #f0f0f0;
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            background-color: #f0f0f0;
         }
         .lang-switcher {
-            position: absolute; top: 15px; right: 20px;
+            position: absolute;
+            top: 15px;
+            right: 20px;
         }
         .lang-switcher button {
-            background: none; border: none; cursor: pointer;
-            font-size: 1em; color: #007bff; padding: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            color: #007bff;
+            padding: 5px;
             text-decoration: underline;
         }
         #start-screen {
-            max-width: 800px; padding: 40px; background-color: white;
-            border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            text-align: left;
+            max-width: 800px; padding: 40px;
+            background-color: white; border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: left;
         }
         #start-screen h1 { text-align: center; }
         #start-screen ul, #start-screen ol { padding-left: 20px; }
         #start-experiment-btn {
-            display: block; width: 60%; margin: 30px auto 0;
-            padding: 15px; font-size: 1.2em; cursor: pointer;
-            background-color: #007bff; color: white; border: none;
-            border-radius: 5px;
+            display: block; width: 60%;
+            margin: 30px auto 0; padding: 15px;
+            font-size: 1.2em; cursor: pointer;
+            background-color: #007bff; color: white;
+            border: none; border-radius: 5px;
         }
         #experiment-screen {
-            display: none; flex-direction: column; align-items: center;
+            display: none; flex-direction: column;
+            align-items: center;
         }
         .image-container {
-            position: relative; width: 800px; height: 600px;
-            border: 1px solid #ccc; background-color: #fff;
+            position: relative; width: 800px;
+            height: 600px; border: 1px solid #ccc;
+            background-color: #fff;
         }
         #mainImage { width: 100%; height: 100%; object-fit: contain; }
         canvas {
-            position: absolute; top: 0; left: 0; width: 100%;
-            height: 100%; cursor: crosshair; display: none;
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            cursor: crosshair; display: none;
         }
         .controls {
-            display: flex; align-items: center; gap: 15px; margin-top: 10px;
+            display: flex; align-items: center;
+            gap: 15px; margin-top: 10px;
         }
         .btn {
-            font-size: 1.1em; padding: 8px 20px; cursor: pointer;
-            color: white; border: none; border-radius: 5px;
+            font-size: 1.1em; padding: 8px 20px;
+            cursor: pointer; color: white;
+            border: none; border-radius: 5px;
         }
         #mappingBtn { background-color: #007bff; }
         #undoBtn { background-color: #ffc107; color: black; }
         #mappingBtn:disabled, #undoBtn:disabled {
             background-color: #ccc; cursor: not-allowed;
         }
-        /* --- ▼▼▼ UI改善のためのCSS変更箇所 ▼▼▼ --- */
-        #stateSelectionPanel {
-            display: none; /* 最初は非表示 */
-            flex-direction: column;
-            align-items: center;
-            width: 800px;
-            margin-top: 15px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
+        #stateSelectionModal {
+            display: none; position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 30px; background-color: white;
+            border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000; border-radius: 10px;
         }
-        #stateSelectionPanel.visible {
-            display: flex; /* 表示する時はflexに */
-        }
-        .state-options {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3列で表示 */
-            gap: 10px 20px; /* 縦横の間隔 */
-            width: 100%;
-            margin: 15px 0;
-        }
-        #startDrawingBtn {
-            margin-top: 10px;
-        }
-        /* --- ▲▲▲ UI改善のためのCSS変更箇所 ▲▲▲ --- */
+        .state-options { display: flex; flex-direction: column; gap: 10px; }
         #instruction {
             margin-top: 10px; font-weight: bold;
             color: #d9534f; height: 20px;
@@ -117,27 +116,38 @@
             <button id="undoBtn" class="btn" data-translate="undo_button" disabled></button>
         </div>
         <div id="instruction"></div>
+    </div>
 
-        <div id="stateSelectionPanel">
-            <h3 data-translate="modal_title"></h3>
-            <div class="state-options">
-                <label><input type="checkbox" name="state" value="Clean"> <span data-translate="state_clean"></span></label>
-                <label><input type="checkbox" name="state" value="Scattered"> <span data-translate="state_scattered"></span></label>
-                <label><input type="checkbox" name="state" value="Broken"> <span data-translate="state_broken"></span></label>
-                <label><input type="checkbox" name="state" value="Wet"> <span data-translate="state_wet"></span></label>
-                <label><input type="checkbox" name="state" value="Risk"> <span data-translate="state_risk"></span></label>
-            </div>
-            <button id="startDrawingBtn" class="btn" data-translate="start_drawing_button"></button>
+    <div id="stateSelectionModal">
+        <h3 data-translate="modal_title"></h3>
+        <div class="state-options">
+            <label><input type="checkbox" name="state" value="Clean"> <span data-translate="state_clean"></span></label>
+            <label><input type="checkbox" name="state" value="Scattered"> <span data-translate="state_scattered"></span></label>
+            <label><input type="checkbox" name="state" value="Broken"> <span data-translate="state_broken"></span></label>
+            <label><input type="checkbox" name="state" value="Wet"> <span data-translate="state_wet"></span></label>
+            <label><input type="checkbox" name="state" value="Risk"> <span data-translate="state_risk"></span></label>
         </div>
-        </div>
+        <br>
+        <button id="startDrawingBtn" class="btn" data-translate="start_drawing_button"></button>
+    </div>
 
     <script>
-    // --- ★★★ 実験設定 ★★★ --- (変更なし)
+    // --- ★★★ 実験設定 ★★★ ---
     const practiceImages = [ 'images/practice1.jpg', 'images/practice2.jpg', 'images/practice3.jpg', 'images/practice4.jpg' ];
-    const mainImages = [ 'images/kitchen_clutter_01.png', 'images/kitchen_clutter_02.png', 'images/kitchen_wet_01.png', 'images/kitchen_wet_02.png', 'images/student_space_risk_01.png', 'images/student_space_risk_02.png', 'images/student_space_risk_03.png', 'images/student_space_risk_04.png' ];
+   const mainImages = [
+            'images/kitchen_clutter_01.png',
+            'images/kitchen_clutter_02.png',
+            'images/kitchen_wet_01.png',
+            'images/kitchen_wet_02.png',
+            'images/student_space_risk_01.png',
+            'images/student_space_risk_02.png',
+            'images/student_space_risk_03.png',
+            'images/student_space_risk_04.png'
+        ];
     const a_gas_url = 'https://script.google.com/macros/s/AKfycbzO-eA9nXtnTD3jSLdvDiagWK2xQZ1wotjPWOTpOrFakRkZKrlP1sdv5aGeUWV4gCFRWg/exec';
+    // --- ★★★ 設定はここまで ★★★ ---
 
-    // --- テキスト管理 --- (変更なし)
+    // --- テキスト管理 ---
     const translations = {
         welcome_title: { ja: "フィードバック実験へようこそ", en: "Welcome to the Feedback Experiment" },
         welcome_intro: { ja: "この実験にご協力いただき、ありがとうございます。以下の説明をよくお読みの上、ご参加ください。", en: "Thank you for participating in this experiment. Please read the instructions below carefully before you begin." },
@@ -183,24 +193,32 @@
         status_save_error: { ja: "エラー：データの保存に失敗しました。", en: "Error: Failed to save data." },
         status_practice_complete: { ja: "練習完了。次の画像に進みます。", en: "Practice complete. Proceeding to the next image." },
     };
+
     let currentLang = 'ja';
 
-    // --- 言語切替機能 --- (変更なし)
+    // --- 言語切替機能 ---
     function setLanguage(lang) {
-        currentLang = lang; document.documentElement.lang = lang;
+        currentLang = lang;
+        document.documentElement.lang = lang;
         document.querySelectorAll('[data-translate]').forEach(el => {
             const key = el.dataset.translate;
-            if (translations[key] && translations[key][lang]) { el.innerHTML = translations[key][lang]; }
+            if (translations[key] && translations[key][lang]) {
+                el.innerHTML = translations[key][lang];
+            }
         });
+        // チェックボックスのvalueも言語に合わせて変更
         document.querySelectorAll('.state-options input[type="checkbox"]').forEach(checkbox => {
             const stateKey = `state_${checkbox.nextElementSibling.dataset.translate.split('_')[1]}`;
-            if (translations[stateKey]) { checkbox.value = translations[stateKey]['en']; }
+            if (translations[stateKey]) {
+                const stateInEnglish = translations[stateKey]['en'];
+                checkbox.value = stateInEnglish;
+            }
         });
     }
     document.getElementById('lang-ja').addEventListener('click', () => setLanguage('ja'));
     document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
     
-    // --- 要素取得と変数定義 (セレクタを更新) ---
+    // --- 要素取得と変数定義 (変更なし) ---
     const startScreen = document.getElementById('start-screen');
     const experimentScreen = document.getElementById('experiment-screen');
     const startExperimentBtn = document.getElementById('start-experiment-btn');
@@ -208,24 +226,57 @@
     const mainImage = document.getElementById('mainImage');
     const mappingBtn = document.getElementById('mappingBtn');
     const undoBtn = document.getElementById('undoBtn');
-    const stateSelectionPanel = document.getElementById('stateSelectionPanel'); // IDを変更
+    const stateSelectionModal = document.getElementById('stateSelectionModal');
     const startDrawingBtn = document.getElementById('startDrawingBtn');
     const canvas = document.getElementById('drawingCanvas');
     const instruction = document.getElementById('instruction');
     const ctx = canvas.getContext('2d');
     let currentImageList = [], currentImageIndex = 0, isPractice = true, selectedStates = [], currentStateIndex = 0, annotations = {}, drawnRects = [], isDrawing = false, startX, startY;
     
-    // --- 実験フロー (UI表示ロジックを修正) ---
+    // --- 実験フロー (動的テキスト部分を修正) ---
     startExperimentBtn.addEventListener('click', () => {
         startScreen.style.display = 'none';
         experimentScreen.style.display = 'flex';
         startSession(true);
     });
 
-    mappingBtn.addEventListener('click', () => {
-        stateSelectionPanel.classList.add('visible'); // パネルを表示
-        mappingBtn.disabled = true; // マッピングボタンを無効化
-    });
+    function startSession(isPracticeSession) {
+        isPractice = isPracticeSession;
+        currentImageIndex = 0;
+        if (isPractice) {
+            sessionTitle.textContent = translations.session_practice[currentLang];
+            currentImageList = practiceImages;
+        } else {
+            sessionTitle.textContent = translations.session_main[currentLang];
+            currentImageList = mainImages;
+        }
+        loadImage();
+    }
+
+    function loadImage() {
+        if (currentImageIndex >= currentImageList.length) {
+            if (isPractice) {
+                alert(translations.alert_practice_end[currentLang]);
+                startSession(false);
+            } else {
+                experimentScreen.innerHTML = `<h1>${translations.alert_experiment_end[currentLang]}</h1>`;
+            }
+            return;
+        }
+        
+        const imageName = currentImageList[currentImageIndex];
+        mainImage.crossOrigin = "Anonymous";
+        mainImage.src = imageName;
+        mainImage.onload = () => {
+            const container = document.querySelector('.image-container');
+            canvas.width = mainImage.naturalWidth;
+            canvas.height = mainImage.naturalHeight;
+            container.style.width = mainImage.clientWidth + 'px';
+            container.style.height = mainImage.clientHeight + 'px';
+        };
+        mappingBtn.disabled = false;
+        instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
+    }
 
     startDrawingBtn.addEventListener('click', () => {
         const checkedBoxes = document.querySelectorAll('input[name="state"]:checked');
@@ -233,79 +284,39 @@
             alert(translations.alert_select_state[currentLang]);
             return;
         }
-        stateSelectionPanel.classList.remove('visible'); // パネルを非表示に
-        
         selectedStates = Array.from(checkedBoxes).map(cb => cb.value);
         currentStateIndex = 0;
         annotations = {};
         drawnRects = [];
-        
+        stateSelectionModal.style.display = 'none';
         canvas.style.display = 'block';
+        mappingBtn.disabled = true;
         undoBtn.disabled = false;
-        
         startDrawingForCurrentState();
     });
 
-    function resetForNextImage(delay) {
-        setTimeout(() => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            canvas.style.display = 'none';
-            stateSelectionPanel.classList.remove('visible'); // パネルを非表示に
-            document.querySelectorAll('input[name="state"]:checked').forEach(cb => cb.checked = false);
-            
-            currentImageIndex++;
-            loadImage();
-        }, delay);
-    }
-    
-    // --- 初期化 ---
-    document.addEventListener('DOMContentLoaded', () => {
-        setLanguage('ja');
-    });
-
-    // --- ▼▼▼ 以下、変更不要な関数群 ▼▼▼ ---
-    function startSession(isPracticeSession) {
-        isPractice = isPracticeSession; currentImageIndex = 0;
-        if (isPractice) {
-            sessionTitle.textContent = translations.session_practice[currentLang]; currentImageList = practiceImages;
-        } else {
-            sessionTitle.textContent = translations.session_main[currentLang]; currentImageList = mainImages;
-        }
-        loadImage();
-    }
-    function loadImage() {
-        if (currentImageIndex >= currentImageList.length) {
-            if (isPractice) {
-                alert(translations.alert_practice_end[currentLang]); startSession(false);
-            } else {
-                experimentScreen.innerHTML = `<h1>${translations.alert_experiment_end[currentLang]}</h1>`;
-            }
+    function startDrawingForCurrentState() {
+        if (currentStateIndex >= selectedStates.length) {
+            finishMapping();
             return;
         }
-        const imageName = currentImageList[currentImageIndex];
-        mainImage.crossOrigin = "Anonymous"; mainImage.src = imageName;
-        mainImage.onload = () => {
-            const container = document.querySelector('.image-container');
-            canvas.width = mainImage.naturalWidth; canvas.height = mainImage.naturalHeight;
-            container.style.width = mainImage.clientWidth + 'px'; container.style.height = mainImage.clientHeight + 'px';
-        };
-        mappingBtn.disabled = false;
-        instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
-    }
-    function startDrawingForCurrentState() {
-        if (currentStateIndex >= selectedStates.length) { finishMapping(); return; }
         const currentState = selectedStates[currentStateIndex];
         instruction.textContent = translations.instruction_draw[currentLang](currentState);
         canvas.addEventListener('mousedown', onMouseDown);
         canvas.addEventListener('mousemove', onMouseMove);
         canvas.addEventListener('mouseup', onMouseUp);
     }
+
     undoBtn.addEventListener('click', () => {
         if (currentStateIndex === 0) return;
-        currentStateIndex--; const lastState = selectedStates[currentStateIndex];
-        delete annotations[lastState]; drawnRects.pop(); redrawCanvas();
+        currentStateIndex--;
+        const lastState = selectedStates[currentStateIndex];
+        delete annotations[lastState];
+        drawnRects.pop();
+        redrawCanvas();
         instruction.textContent = translations.instruction_draw[currentLang](lastState);
     });
+    
     function finishMapping() {
         instruction.textContent = translations.status_saving[currentLang];
         canvas.removeEventListener('mousedown', onMouseDown);
@@ -316,22 +327,56 @@
             console.log("Practice data:", { imageName: currentImageList[currentImageIndex], annotations: annotations });
             instruction.textContent = translations.status_practice_complete[currentLang];
             resetForNextImage(1500);
-        } else { saveDataToServer(); }
+        } else {
+            saveDataToServer();
+        }
     }
+
     function saveDataToServer() {
         if (!a_gas_url || a_gas_url.includes('貼り付け')) {
             console.error("GAS URL is not set.");
-            instruction.textContent = "Error: Submission URL is not configured.";
-            resetForNextImage(2000); return;
+            instruction.textContent = "Error: Submission URL is not configured. Saving locally for test.";
+            resetForNextImage(2000);
+            return;
         }
-        const dataToSend = { imageName: currentImageList[currentImageIndex], annotations: annotations, imageDataUrl: getAnnotatedImageDataUrl() };
+        const dataToSend = {
+            imageName: currentImageList[currentImageIndex],
+            annotations: annotations,
+            imageDataUrl: getAnnotatedImageDataUrl()
+        };
         fetch(a_gas_url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSend)})
-        .then(() => { instruction.textContent = translations.status_save_complete[currentLang]; })
-        .catch(error => { console.error('Data submission failed:', error); instruction.textContent = translations.status_save_error[currentLang]; })
+        .then(() => {
+            console.log('Data submission successful.');
+            instruction.textContent = translations.status_save_complete[currentLang];
+        })
+        .catch(error => {
+            console.error('Data submission failed:', error);
+            instruction.textContent = translations.status_save_error[currentLang];
+        })
         .finally(() => { resetForNextImage(2000); });
     }
+
+    function resetForNextImage(delay) {
+        setTimeout(() => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.style.display = 'none';
+            document.querySelectorAll('input[name="state"]:checked').forEach(cb => cb.checked = false);
+            currentImageIndex++;
+            loadImage();
+        }, delay);
+    }
+    
+    // --- ページの初期化 ---
+    document.addEventListener('DOMContentLoaded', () => {
+        setLanguage('ja'); // デフォルト言語を日本語に設定
+    });
+    
+    // --- 変更不要な関数群 ---
+    mappingBtn.addEventListener('click', () => { stateSelectionModal.style.display = 'block'; });
     function redrawCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.strokeStyle = 'red'; ctx.lineWidth = 3;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 3;
         drawnRects.forEach(rect => { ctx.strokeRect(rect.x, rect.y, rect.width, rect.height); });
     }
     function onMouseDown(e) {
@@ -343,7 +388,8 @@
         if (!isDrawing) return; const rect = canvas.getBoundingClientRect();
         const currentX = (e.clientX - rect.left) * (canvas.width / rect.width);
         const currentY = (e.clientY - rect.top) * (canvas.height / rect.height);
-        redrawCanvas(); ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
+        redrawCanvas();
+        ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
     }
     function onMouseUp(e) {
         if (!isDrawing) return; isDrawing = false; const rect = canvas.getBoundingClientRect();
@@ -351,8 +397,10 @@
         const endY = (e.clientY - rect.top) * (canvas.height / rect.height);
         const newRect = { x: Math.min(startX, endX), y: Math.min(startY, endY), width: Math.abs(endX - startX), height: Math.abs(endY - startY) };
         const currentState = selectedStates[currentStateIndex];
-        annotations[currentState] = newRect; drawnRects.push(newRect);
-        currentStateIndex++; startDrawingForCurrentState();
+        annotations[currentState] = newRect;
+        drawnRects.push(newRect);
+        currentStateIndex++;
+        startDrawingForCurrentState();
     }
     function getAnnotatedImageDataUrl() {
         const tempCanvas = document.createElement('canvas'); tempCanvas.width = mainImage.naturalWidth; tempCanvas.height = mainImage.naturalHeight;
