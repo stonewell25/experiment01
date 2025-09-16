@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>画像フィードバック実験</title>
+    <style>
+        /* CSS (デザイン) */
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+        }
+        /* 画像とキャンバスを重ねるためのコンテナ */
+        .image-container {
+            position: relative;
+            width: 800px; /* 画像のサイズに合わせる */
+            height: 600px; /* 画像のサイズに合わせる */
+            border: 1px solid #ccc;
+            background-color: #fff;
+        }
+        #mainImage {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* アスペクト比を保って表示 */
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            display: none; /* 最初は非表示 */
+        }
+        /* 操作パネル */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        #mappingBtn, #nextImageBtn {
+            font-size: 1.1em;
+            padding: 8px 20px;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #mappingBtn { background-color: #007bff; }
+        #nextImageBtn { background-color: #28a745; }
+        #mappingBtn:disabled, #nextImageBtn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        /* 状態選択モーダル */
+        #stateSelectionModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 30px;
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            border-radius: 10px;
+        }
+        .state-options { display: flex; flex-direction: column; gap: 10px; }
+        #instruction {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #d9534f;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>フィードバック実験ページ</h1>
+    
+    <div class="image-container">
+        <img id="mainImage" src="" alt="実験画像">
+        <canvas id="drawingCanvas"></canvas>
+    </div>
+
+    <div class="controls">
+        <button id="mappingBtn">マッピング</button>
+        <button id="nextImageBtn" disabled>次の画像へ</button>
+    </div>
+
+    <div id="instruction"></div>
+
+    <div id="stateSelectionModal">
+        <h3>あなたの感じる状態を選択してください (複数選択可)</h3>
+        <div class="state-options">
+            <label><input type="checkbox" name="state" value="清潔"> 清潔</label>
+            <label><input type="checkbox" name="state" value="散乱"> 散乱</label>
+            <label><input type="checkbox" name="state" value="壊れ"> 壊れ</label>
+            <label><input type="checkbox" name="state" value="濡れ"> 濡れ</label>
+            <label><input type="checkbox" name="state" value="リスク"> リスク</label>
+        </div>
+        <br>
+        <button id="startDrawingBtn">描画を開始</button>
+    </div>
+
+
+    <script>
+        // JavaScript (動作)
+
+        // --- ★★★ 実験設定 ★★★ ---
+        // 実験で使う画像ファイル名をここに追加してください
+        const imageFiles = [
+            'images/kitchen_clutter_01.png',
+            'images/kitchen_clutter_02.png',
+            'images/kitchen_wet_01.png',
+            'images/kitchen_wet_02.png',
+            'images/student_space_risk_01.png',
+            'images/student_space_risk_02.png',
+            'images/student_space_risk_03.png',
+            'images/student_space_risk_04.png',
+            'images/student_space_risk_05.png'
+        ];
+        // データを送信するGoogle Apps ScriptのURL
+        const a_gas_url = 'https://script.google.com/macros/s/AKfycbzO-eA9nXtnTD3jSLdvDiagWK2xQZ1wotjPWOTpOrFakRkZKrlP1sdv5aGeUWV4gCFRWg/exec';
+        // --- ★★★ 設定はここまで ★★★ ---
+
+
+        // HTML要素を取得
+        const mainImage = document.getElementById('mainImage');
+        const mappingBtn = document.getElementById('mappingBtn');
+        const nextImageBtn = document.getElementById('nextImageBtn');
+        const stateSelectionModal = document.getElementById('stateSelectionModal');
+        const startDrawingBtn = document.getElementById('startDrawingBtn');
+        const canvas = document.getElementById('drawingCanvas');
+        const instruction = document.getElementById('instruction');
+        const ctx = canvas.getContext('2d');
+
+        // 変数定義
+        let currentImageIndex = 0;
+        let selectedStates = [];
+        let currentStateIndex = 0;
+        let annotations = {};
+        let isDrawing = false;
+        let startX, startY;
+
+        // --- 画像の読み込みと表示 ---
+        function loadImage() {
+            if (currentImageIndex >= imageFiles.length) {
+                // 全ての画像が終了
+                instruction.textContent = '全ての実験が終了しました。ご協力ありがとうございました。';
+                mappingBtn.disabled = true;
+                nextImageBtn.disabled = true;
+                return;
+            }
+            const imageName = imageFiles[currentImageIndex];
+            mainImage.src = imageName;
+            
+            // 画像が読み込まれたらキャンバスのサイズを合わせる
+            mainImage.onload = () => {
+                const container = document.querySelector('.image-container');
+                canvas.width = mainImage.naturalWidth;
+                canvas.height = mainImage.naturalHeight;
+                container.style.width = mainImage.clientWidth + 'px';
+                container.style.height = mainImage.clientHeight + 'px';
+            };
+
+            // 状態をリセット
+            mappingBtn.disabled = false;
+            nextImageBtn.disabled = true;
+            instruction.textContent = `画像 ${currentImageIndex + 1} / ${imageFiles.length}`;
+        }
+
+        // --- イベントリスナー ---
+        
+        // 最初の画像を読み込む
+        window.onload = loadImage;
+
+        // マッピングボタンが押されたらモーダルを表示
+        mappingBtn.addEventListener('click', () => {
+            stateSelectionModal.style.display = 'block';
+        });
+        
+        // 「次の画像へ」ボタン（手動で進む場合）
+        nextImageBtn.addEventListener('click', () => {
+            currentImageIndex++;
+            loadImage();
+        });
+
+        // 「描画を開始」ボタンが押されたら
+        startDrawingBtn.addEventListener('click', () => {
+            const checkedBoxes = document.querySelectorAll('input[name="state"]:checked');
+            if (checkedBoxes.length === 0) {
+                alert('少なくとも1つの状態を選択してください。');
+                return;
+            }
+            
+            selectedStates = Array.from(checkedBoxes).map(cb => cb.value);
+            currentStateIndex = 0;
+            annotations = {};
+
+            stateSelectionModal.style.display = 'none';
+            canvas.style.display = 'block';
+            mappingBtn.disabled = true; // 描画中はボタンを無効化
+            
+            startDrawingForCurrentState();
+        });
+
+        function startDrawingForCurrentState() {
+            const currentState = selectedStates[currentStateIndex];
+            instruction.textContent = `【${currentState}】と感じる部分を四角で囲ってください。`;
+            canvas.addEventListener('mousedown', onMouseDown);
+            canvas.addEventListener('mousemove', onMouseMove);
+            canvas.addEventListener('mouseup', onMouseUp);
+        }
+
+        // --- キャンバス描画関連 (変更なし) ---
+        function onMouseDown(e) {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            startX = (e.clientX - rect.left) * (canvas.width / rect.width);
+            startY = (e.clientY - rect.top) * (canvas.height / rect.height);
+        }
+        function onMouseMove(e) {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const currentX = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const currentY = (e.clientY - rect.top) * (canvas.height / rect.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
+        }
+        function onMouseUp(e) {
+            if (!isDrawing) return;
+            isDrawing = false;
+            const rect = canvas.getBoundingClientRect();
+            const endX = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const endY = (e.clientY - rect.top) * (canvas.height / rect.height);
+            const currentState = selectedStates[currentStateIndex];
+            annotations[currentState] = {
+                x: Math.min(startX, endX),
+                y: Math.min(startY, endY),
+                width: Math.abs(endX - startX),
+                height: Math.abs(endY - startY)
+            };
+            currentStateIndex++;
+            if (currentStateIndex < selectedStates.length) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                startDrawingForCurrentState();
+            } else {
+                finishMapping();
+            }
+        }
+
+        // --- データ保存とリセット ---
+        function finishMapping() {
+            instruction.textContent = 'マッピング完了。データをサーバーに送信中...';
+            canvas.removeEventListener('mousedown', onMouseDown);
+            canvas.removeEventListener('mousemove', onMouseMove);
+            canvas.removeEventListener('mouseup', onMouseUp);
+            
+            // データをサーバーに送信
+            saveDataToServer();
+        }
+
+        function saveDataToServer() {
+            if (!a_gas_url || a_gas_url === 'ここにGoogle Apps ScriptのウェブアプリURLを貼り付け') {
+                console.error("GASのURLが設定されていません。");
+                instruction.textContent = "エラー: 送信先URLが未設定です。";
+                // テスト用にローカルダウンロードを有効にする
+                downloadAnnotatedImage(); 
+                resetForNextImage(2000);
+                return;
+            }
+
+            // 1. 注釈付きの画像データを取得
+            const annotatedImageDataUrl = getAnnotatedImageDataUrl();
+
+            // 2. 送信するデータをまとめる
+            const dataToSend = {
+                imageName: imageFiles[currentImageIndex],
+                annotations: annotations,
+                imageDataUrl: annotatedImageDataUrl
+            };
+
+            // 3. fetch APIを使ってGASにPOSTリクエストを送信
+            fetch(a_gas_url, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataToSend)
+            })
+            .then(() => {
+                console.log('データの送信に成功しました。');
+                instruction.textContent = 'データの保存が完了しました。';
+            })
+            .catch(error => {
+                console.error('データの送信に失敗しました:', error);
+                instruction.textContent = 'エラー：データの保存に失敗しました。';
+            })
+            .finally(() => {
+                resetForNextImage(2000); // 2秒後に次の画像へ
+            });
+        }
+        
+        function getAnnotatedImageDataUrl() {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = mainImage.naturalWidth;
+            tempCanvas.height = mainImage.naturalHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(mainImage, 0, 0); // 元画像を描画
+            // 注釈を描画
+            tempCtx.strokeStyle = 'lime';
+            tempCtx.lineWidth = 5;
+            Object.values(annotations).forEach(rect => {
+                tempCtx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+            });
+            return tempCanvas.toDataURL('image/png');
+        }
+        
+        // ローカルテスト用のダウンロード関数
+        function downloadAnnotatedImage(){
+            const link = document.createElement('a');
+            link.download = `annotated_${imageFiles[currentImageIndex]}`;
+            link.href = getAnnotatedImageDataUrl();
+            link.click();
+        }
+
+        function resetForNextImage(delay) {
+            setTimeout(() => {
+                // キャンバスをクリアして非表示に
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                canvas.style.display = 'none';
+                
+                // チェックボックスのチェックを外す
+                document.querySelectorAll('input[name="state"]:checked').forEach(cb => cb.checked = false);
+                
+                // 次の画像へ
+                currentImageIndex++;
+                loadImage();
+            }, delay);
+        }
+    </script>
+</body>
+</html>
