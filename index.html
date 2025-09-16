@@ -54,8 +54,9 @@
         }
         #mappingBtn { background-color: #007bff; }
         #undoBtn { background-color: #ffc107; color: black; }
-        #mappingBtn:disabled, #undoBtn:disabled {
-            background-color: #ccc; cursor: not-allowed;
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
         /* --- ▼▼▼ UI改善のためのCSS変更箇所 ▼▼▼ --- */
         #stateSelectionPanel {
@@ -70,6 +71,23 @@
             border-radius: 8px;
             box-sizing: border-box;
         }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.8em;
+            line-height: 1;
+            color: #888;
+            cursor: pointer;
+            padding: 0;
+        }
+        .close-btn:hover {
+            color: #333;
+        }
+
+        
         #stateSelectionPanel.visible {
             display: flex; /* 表示する時はflexに */
         }
@@ -119,6 +137,7 @@
         <div id="instruction"></div>
 
         <div id="stateSelectionPanel">
+            <button id="closeSelectionPanelBtn" class="close-btn">&times;</button>
             <h3 data-translate="modal_title"></h3>
             <div class="state-options">
                 <label><input type="checkbox" name="state" value="Clean"> <span data-translate="state_clean"></span></label>
@@ -127,7 +146,7 @@
                 <label><input type="checkbox" name="state" value="Wet"> <span data-translate="state_wet"></span></label>
                 <label><input type="checkbox" name="state" value="Risk"> <span data-translate="state_risk"></span></label>
             </div>
-            <button id="startDrawingBtn" class="btn" data-translate="start_drawing_button"></button>
+            <button id="startDrawingBtn" class="btn" data-translate="start_drawing_button" disabled></button>
         </div>
         </div>
 
@@ -209,17 +228,39 @@
     const mappingBtn = document.getElementById('mappingBtn');
     const undoBtn = document.getElementById('undoBtn');
     const stateSelectionPanel = document.getElementById('stateSelectionPanel'); // IDを変更
+    const closeSelectionPanelBtn = document.getElementById('closeSelectionPanelBtn'); // この行を追加
     const startDrawingBtn = document.getElementById('startDrawingBtn');
     const canvas = document.getElementById('drawingCanvas');
     const instruction = document.getElementById('instruction');
     const ctx = canvas.getContext('2d');
     let currentImageList = [], currentImageIndex = 0, isPractice = true, selectedStates = [], currentStateIndex = 0, annotations = {}, drawnRects = [], isDrawing = false, startX, startY;
     
+    // チェックボックスの状態を監視し、描画開始ボタンの有効/無効を切り替える
+    const checkboxes = document.querySelectorAll('.state-options input[type="checkbox"]');
+    function updateStartDrawingButtonState() {
+        // 1つでもチェックされているか確認
+        const isAnyChecked = Array.from(checkboxes).some(cb => cb.checked);
+        // チェックされていればdisabledをfalse (有効) に、されていなければtrue (無効) にする
+        startDrawingBtn.disabled = !isAnyChecked;
+    }
+
+    // 全てのチェックボックスにイベントリスナーを追加
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateStartDrawingButtonState);
+    });
+    
     // --- 実験フロー (UI表示ロジックを修正) ---
     startExperimentBtn.addEventListener('click', () => {
         startScreen.style.display = 'none';
         experimentScreen.style.display = 'flex';
         startSession(true);
+    });
+
+    closeSelectionPanelBtn.addEventListener('click', () => {
+    stateSelectionPanel.classList.remove('visible'); // パネルを非表示に
+    mappingBtn.disabled = false; // マッピングボタンを再度有効化
+    // 念のためチェックボックスをリセット
+    document.querySelectorAll('input[name="state"]:checked').forEach(cb => cb.checked = false);
     });
 
     mappingBtn.addEventListener('click', () => {
