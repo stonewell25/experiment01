@@ -252,7 +252,9 @@
     mappingBtn.addEventListener('click', () => {
         stateSelectionPanel.classList.add('visible');
         mappingBtn.disabled = true;
-        updateStartDrawingButtonState(); // パネル表示時にボタンの状態を初期化
+        updateStartDrawingButtonState();
+        const y = stateSelectionPanel.getBoundingClientRect().top + window.pageYOffset - 20; // 20px 余白
+        window.scrollTo({ top: y, behavior: 'smooth' });
     });
 
     closeSelectionPanelBtn.addEventListener('click', () => {
