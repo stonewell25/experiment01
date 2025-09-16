@@ -162,23 +162,13 @@
         welcome_intro: { ja: "この実験にご協力いただき、ありがとうございます。以下の説明をよくお読みの上、ご参加ください。", en: "Thank you for participating in this experiment. Please read the instructions below carefully before you begin." },
         overview_title: { ja: "実験の概要", en: "Experiment Overview" },
         overview_list: {
-            ja: `<li>合計12枚（練習4枚、本番8枚）の画像を見て、特定の状態が感じられる箇所を四角形で囲っていただきます。</li>
-                 <li>対象となる状態は <strong>{清潔, 散乱, 濡れ, 壊れている, リスクがある}</strong> の5つです。</li>
-                 <li>1つの箇所に対して、複数の状態を定義することも可能です。（例：「濡れていてリスクがある」など）</li>`,
-            en: `<li>You will be shown a total of 12 images (4 for practice, 8 for the main task). For each image, you will draw rectangles around areas where you perceive certain states.</li>
-                 <li>The states are: <strong>{Clean, Scattered, Wet, Broken, Risk}</strong>.</li>
-                 <li>It is possible to define multiple states for the same area (e.g., an area can be both "Wet" and a "Risk").</li>`
+            ja: `<li>合計12枚（練習4枚、本番8枚）の画像を見て、特定の状態が感じられる箇所を四角形で囲っていただきます。</li><li>対象となる状態は <strong>{清潔, 散乱, 濡れ, 壊れている, リスクがある}</strong> の5つです。</li><li>1つの箇所に対して、複数の状態を定義することも可能です。（例：「濡れていてリスクがある」など）</li>`,
+            en: `<li>You will be shown a total of 12 images (4 for practice, 8 for the main task). For each image, you will draw rectangles around areas where you perceive certain states.</li><li>The states are: <strong>{Clean, Scattered, Wet, Broken, Risk}</strong>.</li><li>It is possible to define multiple states for the same area (e.g., an area can be both "Wet" and a "Risk").</li>`
         },
         how_to_title: { ja: "操作方法", en: "How to Operate" },
         how_to_list: {
-            ja: `<li>「マッピング」ボタンを押し、画像から感じる状態を複数選択します。</li>
-                 <li>「描画を開始」ボタンを押します。</li>
-                 <li>指示に従い、該当する箇所をマウスでドラッグして四角で囲みます。</li>
-                 <li>選択した全ての状態について描画が完了すると、データが自動で保存され、次の画像に進みます。</li>`,
-            en: `<li>Click the "Mapping" button and select one or more states you perceive in the image.</li>
-                 <li>Click the "Start Drawing" button.</li>
-                 <li>Follow the instructions to draw a rectangle by dragging your mouse over the corresponding area.</li>
-                 <li>Once you have drawn areas for all selected states, the data will be saved automatically, and you will proceed to the next image.</li>`
+            ja: `<li>「マッピング」ボタンを押し、画像から感じる状態を複数選択します。</li><li>「描画を開始」ボタンを押します。</li><li>指示に従い、該当する箇所をマウスでドラッグして四角で囲みます。</li><li>選択した全ての状態について描画が完了すると、データが自動で保存され、次の画像に進みます。</li>`,
+            en: `<li>Click the "Mapping" button and select one or more states you perceive in the image.</li><li>Click the "Start Drawing" button.</li><li>Follow the instructions to draw a rectangle by dragging your mouse over the corresponding area.</li><li>Once you have drawn areas for all selected states, the data will be saved automatically, and you will proceed to the next image.</li>`
         },
         start_button: { ja: "練習を開始する", en: "Start Practice" },
         mapping_button: { ja: "マッピング", en: "Mapping" },
@@ -218,8 +208,8 @@
     }
     document.getElementById('lang-ja').addEventListener('click', () => setLanguage('ja'));
     document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
-    
-    // --- 要素取得と変数定義 (セレクタを更新) ---
+
+    // --- 要素取得と変数定義 ---
     const startScreen = document.getElementById('start-screen');
     const experimentScreen = document.getElementById('experiment-screen');
     const startExperimentBtn = document.getElementById('start-experiment-btn');
@@ -227,56 +217,54 @@
     const mainImage = document.getElementById('mainImage');
     const mappingBtn = document.getElementById('mappingBtn');
     const undoBtn = document.getElementById('undoBtn');
-    const stateSelectionPanel = document.getElementById('stateSelectionPanel'); // IDを変更
-    const closeSelectionPanelBtn = document.getElementById('closeSelectionPanelBtn'); // この行を追加
+    const stateSelectionPanel = document.getElementById('stateSelectionPanel');
+    const closeSelectionPanelBtn = document.getElementById('closeSelectionPanelBtn');
     const startDrawingBtn = document.getElementById('startDrawingBtn');
     const canvas = document.getElementById('drawingCanvas');
     const instruction = document.getElementById('instruction');
     const ctx = canvas.getContext('2d');
     let currentImageList = [], currentImageIndex = 0, isPractice = true, selectedStates = [], currentStateIndex = 0, annotations = {}, drawnRects = [], isDrawing = false, startX, startY;
-    
-    // チェックボックスの状態を監視し、描画開始ボタンの有効/無効を切り替える
     const checkboxes = document.querySelectorAll('.state-options input[type="checkbox"]');
+
+    // --- ▼▼▼ ボタン状態管理のロジック ▼▼▼ ---
     function updateStartDrawingButtonState() {
-        // 1つでもチェックされているか確認
         const isAnyChecked = Array.from(checkboxes).some(cb => cb.checked);
-        // チェックされていればdisabledをfalse (有効) に、されていなければtrue (無効) にする
         startDrawingBtn.disabled = !isAnyChecked;
     }
 
-    // 全てのチェックボックスにイベントリスナーを追加
     checkboxes.forEach(checkbox => {
         checkbox.addEventListener('change', updateStartDrawingButtonState);
     });
-    
-    // --- 実験フロー (UI表示ロジックを修正) ---
+    // --- ▲▲▲ ボタン状態管理のロジック ▲▲▲ ---
+
+    // --- 実験フロー ---
     startExperimentBtn.addEventListener('click', () => {
         startScreen.style.display = 'none';
         experimentScreen.style.display = 'flex';
         startSession(true);
     });
 
-    closeSelectionPanelBtn.addEventListener('click', () => {
-    stateSelectionPanel.classList.remove('visible'); // パネルを非表示に
-    mappingBtn.disabled = false; // マッピングボタンを再度有効化
-    // 念のためチェックボックスをリセット
-    document.querySelectorAll('input[name="state"]:checked').forEach(cb => cb.checked = false);
+    mappingBtn.addEventListener('click', () => {
+        stateSelectionPanel.classList.add('visible');
+        mappingBtn.disabled = true;
+        updateStartDrawingButtonState(); // パネル表示時にボタンの状態を初期化
     });
 
-    mappingBtn.addEventListener('click', () => {
-        stateSelectionPanel.classList.add('visible'); // パネルを表示
-        mappingBtn.disabled = true; // マッピングボタンを無効化
+    closeSelectionPanelBtn.addEventListener('click', () => {
+        stateSelectionPanel.classList.remove('visible');
+        mappingBtn.disabled = false;
+        document.querySelectorAll('input[name="state"]:checked').forEach(cb => cb.checked = false);
+        updateStartDrawingButtonState(); // パネルを閉じる時もボタンの状態をリセット
     });
 
     startDrawingBtn.addEventListener('click', () => {
-        const checkedBoxes = document.querySelectorAll('input[name="state"]:checked');
-        if (checkedBoxes.length === 0) {
-            alert(translations.alert_select_state[currentLang]);
-            return;
-        }
-        stateSelectionPanel.classList.remove('visible'); // パネルを非表示に
+        // startDrawingBtnが有効な時点で、最低1つはチェックされているはずなので、
+        // ここでのチェックは実質不要ですが、念のため残します。
+        if (startDrawingBtn.disabled) return;
         
-        selectedStates = Array.from(checkedBoxes).map(cb => cb.value);
+        stateSelectionPanel.classList.remove('visible');
+        
+        selectedStates = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
         currentStateIndex = 0;
         annotations = {};
         drawnRects = [];
@@ -291,15 +279,15 @@
         setTimeout(() => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             canvas.style.display = 'none';
-            stateSelectionPanel.classList.remove('visible'); // パネルを非表示に
-            document.querySelectorAll('input[name="state"]:checked').forEach(cb => cb.checked = false);
+            stateSelectionPanel.classList.remove('visible');
+            checkboxes.forEach(cb => cb.checked = false);
             
             currentImageIndex++;
             loadImage();
         }, delay);
     }
-    
-    // --- 初期化 ---
+
+    // --- ページの初期化 ---
     document.addEventListener('DOMContentLoaded', () => {
         setLanguage('ja');
     });
@@ -393,7 +381,7 @@
         const newRect = { x: Math.min(startX, endX), y: Math.min(startY, endY), width: Math.abs(endX - startX), height: Math.abs(endY - startY) };
         const currentState = selectedStates[currentStateIndex];
         annotations[currentState] = newRect; drawnRects.push(newRect);
-        currentStateIndex++; startDrawingForCurrentState();
+    s    currentStateIndex++; startDrawingForCurrentState();
     }
     function getAnnotatedImageDataUrl() {
         const tempCanvas = document.createElement('canvas'); tempCanvas.width = mainImage.naturalWidth; tempCanvas.height = mainImage.naturalHeight;
@@ -402,6 +390,7 @@
         Object.values(annotations).forEach(rect => { tempCtx.strokeRect(rect.x, rect.y, rect.width, rect.height); });
         return tempCanvas.toDataURL('image/png');
     }
+
     </script>
 </body>
 </html>
