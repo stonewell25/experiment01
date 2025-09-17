@@ -253,9 +253,12 @@
     });
 
     mappingBtn.addEventListener('click', () => {
+        console.log('mappingBtn clicked, isDrawingMode:', isDrawingMode); // デバッグ用
+    
     // 描画中の場合（canvas が表示されている場合）
        // 描画中の場合
        if (isDrawingMode) {
+        console.log('Drawing mode detected, stopping drawing'); // デバッグ用
         // 描画を中断して状態選択に戻る
         canvas.style.display = 'none';
         stateSelectionPanel.classList.add('visible');
@@ -275,6 +278,9 @@
         
         return;
     }
+
+        console.log('Normal mapping process'); // デバッグ用
+
         // 通常のマッピング処理
         stateSelectionPanel.classList.add('visible');
         mappingBtn.disabled = true;
@@ -290,6 +296,8 @@
     });
 
     startDrawingBtn.addEventListener('click', () => {
+        console.log('startDrawingBtn clicked'); // デバッグ用
+    
         if (startDrawingBtn.disabled) return;
         
         stateSelectionPanel.classList.remove('visible');
@@ -307,6 +315,8 @@
         undoBtn.disabled = false;
         isDrawingMode = true; // フラグを設定
         
+        console.log('isDrawingMode set to:', isDrawingMode); // デバッグ用
+    
         startDrawing();
         });
 
