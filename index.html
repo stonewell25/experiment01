@@ -112,6 +112,41 @@
         #undoBtn {
             display: none; /* 初期状態で非表示 */
         }
+        
+        /* 確認ダイアログのスタイル */
+        #confirmDialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .dialog-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .dialog-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .dialog-buttons .btn {
+            min-width: 80px;
+        }
     </style>
 </head>
 <body>
@@ -153,6 +188,18 @@
                 <label><input type="checkbox" name="state" value="Risk"> <span data-translate="state_risk"></span></label>
             </div>
             <button id="startDrawingBtn" class="btn" data-translate="start_drawing_button" disabled></button>
+        </div>
+        
+        <!-- 確認ダイアログ -->
+        <div id="confirmDialog" style="display: none;">
+            <div class="dialog-content">
+                <h3 data-translate="confirm_title"></h3>
+                <p data-translate="confirm_message"></p>
+                <div class="dialog-buttons">
+                    <button id="confirmYes" class="btn" data-translate="confirm_yes"></button>
+                    <button id="confirmNo" class="btn" data-translate="confirm_no"></button>
+                </div>
+            </div>
         </div>
         </div>
 
@@ -198,6 +245,10 @@
         status_save_complete: { ja: "データの保存が完了しました。", en: "Save complete." },
         status_save_error: { ja: "エラー：データの保存に失敗しました。", en: "Error: Failed to save data." },
         status_practice_complete: { ja: "練習完了。次の画像に進みます。", en: "Practice complete. Proceeding to the next image." },
+        confirm_title: { ja: "確認", en: "Confirmation" },
+        confirm_message: { ja: "この四角形で確定しますか？", en: "Are you sure you want to confirm this rectangle?" },
+        confirm_yes: { ja: "はい", en: "Yes" },
+        confirm_no: { ja: "いいえ", en: "No" },
     };
     let currentLang = 'ja';
 
@@ -231,7 +282,10 @@
     const canvas = document.getElementById('drawingCanvas');
     const instruction = document.getElementById('instruction');
     const ctx = canvas.getContext('2d');
-    let currentImageList = [], currentImageIndex = 0, isPractice = true, selectedStates = [], currentStateIndex = 0, annotations = {}, drawnRects = [], isDrawing = false, startX, startY, isDrawingMode = false;
+    const confirmDialog = document.getElementById('confirmDialog');
+    const confirmYes = document.getElementById('confirmYes');
+    const confirmNo = document.getElementById('confirmNo');
+    let currentImageList = [], currentImageIndex = 0, isPractice = true, selectedStates = [], currentStateIndex = 0, annotations = {}, drawnRects = [], isDrawing = false, startX, startY, isDrawingMode = false, pendingRect = null;
     const checkboxes = document.querySelectorAll('.state-options input[type="checkbox"]');
 
     // --- ▼▼▼ ボタン状態管理のロジック ▼▼▼ ---
@@ -387,6 +441,32 @@
         delete annotations[lastState]; drawnRects.pop(); redrawCanvas();
         instruction.textContent = translations.instruction_draw[currentLang](lastState);
     });
+
+    // 確認ダイアログのイベントハンドラー
+    confirmYes.addEventListener('click', () => {
+        if (pendingRect) {
+            // 四角形を確定
+            annotations[pendingRect.state] = pendingRect.rect;
+            drawnRects.push(pendingRect.rect);
+            currentStateIndex++;
+            
+            // ダイアログを閉じる
+            confirmDialog.style.display = 'none';
+            pendingRect = null;
+            
+            // 次の状態の描画を開始
+            startDrawingForCurrentState();
+        }
+    });
+
+    confirmNo.addEventListener('click', () => {
+        // 四角形を破棄
+        confirmDialog.style.display = 'none';
+        pendingRect = null;
+        
+        // 現在の状態の描画を再開（同じ状態をもう一度描画）
+        instruction.textContent = translations.instruction_draw[currentLang](selectedStates[currentStateIndex]);
+    });
     function finishMapping() {
         instruction.textContent = translations.status_saving[currentLang];
         canvas.removeEventListener('mousedown', onMouseDown);
@@ -436,13 +516,23 @@
         redrawCanvas(); ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
     }
     function onMouseUp(e) {
-        if (!isDrawing) return; isDrawing = false; const rect = canvas.getBoundingClientRect();
+        if (!isDrawing) return; 
+        isDrawing = false; 
+        const rect = canvas.getBoundingClientRect();
         const endX = (e.clientX - rect.left) * (canvas.width / rect.width);
         const endY = (e.clientY - rect.top) * (canvas.height / rect.height);
         const newRect = { x: Math.min(startX, endX), y: Math.min(startY, endY), width: Math.abs(endX - startX), height: Math.abs(endY - startY) };
-        const currentState = selectedStates[currentStateIndex];
-        annotations[currentState] = newRect; drawnRects.push(newRect);
-        currentStateIndex++; startDrawingForCurrentState();
+        
+        // 四角形が小さすぎる場合は無視
+        if (newRect.width < 5 || newRect.height < 5) {
+            return;
+        }
+        
+        // 確認ダイアログを表示する前に、一時的に四角形を保存
+        pendingRect = { rect: newRect, state: selectedStates[currentStateIndex] };
+        
+        // 確認ダイアログを表示
+        confirmDialog.style.display = 'flex';
     }
     function getAnnotatedImageDataUrl() {
         const tempCanvas = document.createElement('canvas'); tempCanvas.width = mainImage.naturalWidth; tempCanvas.height = mainImage.naturalHeight;
