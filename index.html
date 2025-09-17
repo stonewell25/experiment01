@@ -317,7 +317,7 @@
         
         console.log('isDrawingMode set to:', isDrawingMode); // デバッグ用
     
-        startDrawing();
+        startDrawingCurrentState();
         });
 
     function resetForNextImage(delay) {
@@ -367,7 +367,7 @@
         undoBtn.style.display = 'none';
         instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
     }
-    function startDrawingForCurrentState() {
+    function startDrawingCurrentState() {
         if (currentStateIndex >= selectedStates.length) { finishMapping(); return; }
         const currentState = selectedStates[currentStateIndex];
         instruction.textContent = translations.instruction_draw[currentLang](currentState);
@@ -437,7 +437,7 @@
         const newRect = { x: Math.min(startX, endX), y: Math.min(startY, endY), width: Math.abs(endX - startX), height: Math.abs(endY - startY) };
         const currentState = selectedStates[currentStateIndex];
         annotations[currentState] = newRect; drawnRects.push(newRect);
-        currentStateIndex++; startDrawingForCurrentState();
+        currentStateIndex++; startDrawingCurrentState();
     }
     function getAnnotatedImageDataUrl() {
         const tempCanvas = document.createElement('canvas'); tempCanvas.width = mainImage.naturalWidth; tempCanvas.height = mainImage.naturalHeight;
