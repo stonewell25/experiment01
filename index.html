@@ -231,7 +231,7 @@
     const canvas = document.getElementById('drawingCanvas');
     const instruction = document.getElementById('instruction');
     const ctx = canvas.getContext('2d');
-    let currentImageList = [], currentImageIndex = 0, isPractice = true, selectedStates = [], currentStateIndex = 0, annotations = {}, drawnRects = [], isDrawing = false, startX, startY;
+    let currentImageList = [], currentImageIndex = 0, isPractice = true, selectedStates = [], currentStateIndex = 0, annotations = {}, drawnRects = [], isDrawing = false, startX, startY, isDrawingMode = false;
     const checkboxes = document.querySelectorAll('.state-options input[type="checkbox"]');
 
     // --- ▼▼▼ ボタン状態管理のロジック ▼▼▼ ---
@@ -254,10 +254,12 @@
 
     mappingBtn.addEventListener('click', () => {
     // 描画中の場合（canvas が表示されている場合）
-    if (canvas.style.display === 'block') {
+       // 描画中の場合
+       if (isDrawingMode) {
         // 描画を中断して状態選択に戻る
         canvas.style.display = 'none';
         stateSelectionPanel.classList.add('visible');
+        isDrawingMode = false; // フラグをリセット
         
         // ボタンテキストを「マッピング」に戻す
         mappingBtn.setAttribute('data-translate', 'mapping_button');
@@ -294,18 +296,19 @@
         
         // ボタンテキストを「状態の選択に戻る」に変更
         mappingBtn.setAttribute('data-translate', 'back_to_selection');
-        setLanguage(currentLang); // 翻訳を更新
+        setLanguage(currentLang);
         
         selectedStates = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
         currentStateIndex = 0;
         drawnRects = [];
         
         canvas.style.display = 'block';
-        undoBtn.style.display = 'block'; // 戻るボタンを表示
+        undoBtn.style.display = 'block';
         undoBtn.disabled = false;
+        isDrawingMode = true; // フラグを設定
         
         startDrawing();
-    });
+        });
 
     function resetForNextImage(delay) {
         setTimeout(() => {
@@ -380,6 +383,8 @@
         
         // 戻るボタンを非表示にする
         undoBtn.style.display = 'none';
+        isDrawingMode = false; // フラグをリセット
+    
         
         undoBtn.disabled = true;
         if (isPractice) {
