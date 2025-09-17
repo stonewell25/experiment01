@@ -56,11 +56,9 @@
         #undoBtn { background-color: #ffc107; color: black; }
         .btn {
             background-color: #007bff;
-            
         }
         .btn:disabled {
             background-color: #ccc;
-            cursor: not-allowed;
         }
         /* --- ▼▼▼ UI改善のためのCSS変更箇所 ▼▼▼ --- */
         #stateSelectionPanel {
@@ -110,6 +108,9 @@
         #instruction {
             margin-top: 10px; font-weight: bold;
             color: #d9534f; height: 20px;
+        }
+        #undoBtn {
+            display: none; /* 初期状態で非表示 */
         }
     </style>
 </head>
@@ -177,6 +178,7 @@
         },
         start_button: { ja: "練習を開始する", en: "Start Practice" },
         mapping_button: { ja: "マッピング", en: "Mapping" },
+        back_to_selection: { ja: "状態の選択に戻る", en: "Back to Selection" },
         undo_button: { ja: "一つ前に戻る", en: "Undo" },
         modal_title: { ja: "あなたの感じる状態を選択してください (複数選択可)", en: "Select the state(s) you perceive (multiple selections allowed)" },
         state_clean: { ja: "清潔", en: "Clean" },
@@ -221,6 +223,7 @@
     const sessionTitle = document.getElementById('session-title');
     const mainImage = document.getElementById('mainImage');
     const mappingBtn = document.getElementById('mappingBtn');
+    const backToSelectionBtn = document.getElementById('backToSelectionBtn');
     const undoBtn = document.getElementById('undoBtn');
     const stateSelectionPanel = document.getElementById('stateSelectionPanel');
     const closeSelectionPanelBtn = document.getElementById('closeSelectionPanelBtn');
@@ -250,11 +253,31 @@
     });
 
     mappingBtn.addEventListener('click', () => {
+    // 描画中の場合（canvas が表示されている場合）
+    if (canvas.style.display === 'block') {
+        // 描画を中断して状態選択に戻る
+        canvas.style.display = 'none';
+        stateSelectionPanel.classList.add('visible');
+        
+        // ボタンテキストを「マッピング」に戻す
+        mappingBtn.setAttribute('data-translate', 'mapping_button');
+        setLanguage(currentLang);
+        
+        // 戻るボタンを非表示にする
+        undoBtn.style.display = 'none';
+        
+        // 描画状態をリセット
+        drawnRects = [];
+        currentStateIndex = 0;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        return;
+    }
+        // 通常のマッピング処理
         stateSelectionPanel.classList.add('visible');
         mappingBtn.disabled = true;
         updateStartDrawingButtonState();
-        const y = stateSelectionPanel.getBoundingClientRect().top + window.pageYOffset - 20; // 20px 余白
-        window.scrollTo({ top: y, behavior: 'smooth' });
+        stateSelectionPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
     closeSelectionPanelBtn.addEventListener('click', () => {
@@ -265,21 +288,23 @@
     });
 
     startDrawingBtn.addEventListener('click', () => {
-        // startDrawingBtnが有効な時点で、最低1つはチェックされているはずなので、
-        // ここでのチェックは実質不要ですが、念のため残します。
         if (startDrawingBtn.disabled) return;
         
         stateSelectionPanel.classList.remove('visible');
         
+        // ボタンテキストを「状態の選択に戻る」に変更
+        mappingBtn.setAttribute('data-translate', 'back_to_selection');
+        setLanguage(currentLang); // 翻訳を更新
+        
         selectedStates = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
         currentStateIndex = 0;
-        annotations = {};
         drawnRects = [];
         
         canvas.style.display = 'block';
+        undoBtn.style.display = 'block'; // 戻るボタンを表示
         undoBtn.disabled = false;
         
-        startDrawingForCurrentState();
+        startDrawing();
     });
 
     function resetForNextImage(delay) {
@@ -326,6 +351,7 @@
             container.style.width = mainImage.clientWidth + 'px'; container.style.height = mainImage.clientHeight + 'px';
         };
         mappingBtn.disabled = false;
+        undoBtn.style.display = 'none';
         instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
     }
     function startDrawingForCurrentState() {
@@ -336,6 +362,7 @@
         canvas.addEventListener('mousemove', onMouseMove);
         canvas.addEventListener('mouseup', onMouseUp);
     }
+
     undoBtn.addEventListener('click', () => {
         if (currentStateIndex === 0) return;
         currentStateIndex--; const lastState = selectedStates[currentStateIndex];
@@ -347,6 +374,13 @@
         canvas.removeEventListener('mousedown', onMouseDown);
         canvas.removeEventListener('mousemove', onMouseMove);
         canvas.removeEventListener('mouseup', onMouseUp);
+        // ボタンテキストを「マッピング」に戻す
+        mappingBtn.setAttribute('data-translate', 'mapping_button');
+        setLanguage(currentLang); // 翻訳を更新
+        
+        // 戻るボタンを非表示にする
+        undoBtn.style.display = 'none';
+        
         undoBtn.disabled = true;
         if (isPractice) {
             console.log("Practice data:", { imageName: currentImageList[currentImageIndex], annotations: annotations });
