@@ -270,6 +270,8 @@
         
         // 戻るボタンを非表示にする
         undoBtn.style.display = 'none';
+        instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
+        
         
         // 描画状態をリセット
         drawnRects = [];
