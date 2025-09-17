@@ -464,6 +464,9 @@
         confirmDialog.style.display = 'none';
         pendingRect = null;
         
+        // キャンバスをクリアして既存の四角形のみ再描画
+        redrawCanvas();
+        
         // 現在の状態の描画を再開（同じ状態をもう一度描画）
         instruction.textContent = translations.instruction_draw[currentLang](selectedStates[currentStateIndex]);
     });
