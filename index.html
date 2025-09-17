@@ -424,6 +424,11 @@
         };
         mappingBtn.disabled = false;
         undoBtn.style.display = 'none';
+        
+        // 確認ダイアログが表示されている場合は閉じる
+        confirmDialog.style.display = 'none';
+        pendingRect = null;
+        
         instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
     }
     function startDrawingForCurrentState() {
@@ -454,6 +459,10 @@
             confirmDialog.style.display = 'none';
             pendingRect = null;
             
+            // ボタンを再有効化
+            mappingBtn.disabled = false;
+            undoBtn.disabled = false;
+            
             // 次の状態の描画を開始
             startDrawingForCurrentState();
         }
@@ -463,6 +472,10 @@
         // 四角形を破棄
         confirmDialog.style.display = 'none';
         pendingRect = null;
+        
+        // ボタンを再有効化
+        mappingBtn.disabled = false;
+        undoBtn.disabled = false;
         
         // キャンバスをクリアして既存の四角形のみ再描画
         redrawCanvas();
@@ -475,6 +488,7 @@
         canvas.removeEventListener('mousedown', onMouseDown);
         canvas.removeEventListener('mousemove', onMouseMove);
         canvas.removeEventListener('mouseup', onMouseUp);
+        
         // ボタンテキストを「マッピング」に戻す
         mappingBtn.setAttribute('data-translate', 'mapping_button');
         setLanguage(currentLang); // 翻訳を更新
@@ -482,9 +496,11 @@
         // 戻るボタンを非表示にする
         undoBtn.style.display = 'none';
         isDrawingMode = false; // フラグをリセット
-    
         
+        // 全てのボタンを無効化（次の画像遷移まで）
+        mappingBtn.disabled = true;
         undoBtn.disabled = true;
+        
         if (isPractice) {
             console.log("Practice data:", { imageName: currentImageList[currentImageIndex], annotations: annotations });
             instruction.textContent = translations.status_practice_complete[currentLang];
@@ -536,6 +552,10 @@
         
         // 確認ダイアログを表示
         confirmDialog.style.display = 'flex';
+        
+        // 確認ダイアログ表示中はボタンを無効化
+        mappingBtn.disabled = true;
+        undoBtn.disabled = true;
     }
     function getAnnotatedImageDataUrl() {
         const tempCanvas = document.createElement('canvas'); tempCanvas.width = mainImage.naturalWidth; tempCanvas.height = mainImage.naturalHeight;
