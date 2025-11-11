@@ -27,11 +27,31 @@
         }
         #start-screen h1 { text-align: center; }
         #start-screen ul, #start-screen ol { padding-left: 20px; }
+        .name-input-container {
+            margin: 20px 0;
+        }
+        .name-input-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .name-input-container input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
         #start-experiment-btn {
             display: block; width: 60%; margin: 30px auto 0;
             padding: 15px; font-size: 1.2em; cursor: pointer;
             background-color: #007bff; color: white; border: none;
             border-radius: 5px;
+        }
+        #start-experiment-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
         #experiment-screen {
             display: none; flex-direction: column; align-items: center;
@@ -109,13 +129,49 @@
         }
         .state-options {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3列で表示 */
+            grid-template-columns: repeat(2, 1fr); /* 2列で表示（4つの選択肢のため） */
             gap: 10px 20px; /* 縦横の間隔 */
             width: 100%;
             margin: 15px 0;
         }
+        .state-options input[type="checkbox"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #riskDescriptionContainer {
+            display: none;
+            width: 100%;
+            margin-top: 15px;
+        }
+        #riskDescriptionContainer.visible {
+            display: block;
+        }
+        #riskDescriptionContainer label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        #riskDescriptionContainer textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            min-height: 80px;
+            resize: vertical;
+        }
         #startDrawingBtn {
             margin-top: 10px;
+        }
+        .clean-selected-message {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 5px;
+            color: #0066cc;
+            font-weight: bold;
         }
         /* --- ▲▲▲ UI改善のためのCSS変更箇所 ▲▲▲ --- */
         #instruction {
@@ -178,11 +234,15 @@
     <div id="start-screen">
         <h1 data-translate="welcome_title"></h1>
         <p data-translate="welcome_intro"></p>
+        <div class="name-input-container">
+            <label data-translate="name_label"></label>
+            <input type="text" id="participantName" placeholder="" data-translate-placeholder="name_placeholder">
+        </div>
         <h3 data-translate="overview_title"></h3>
         <ul data-translate="overview_list"></ul>
         <h3 data-translate="how_to_title"></h3>
         <ol data-translate="how_to_list"></ol>
-        <button id="start-experiment-btn" data-translate="start_button"></button>
+        <button id="start-experiment-btn" data-translate="start_button" disabled></button>
     </div>
 
     <div id="experiment-screen">
@@ -202,10 +262,14 @@
             <h3 data-translate="modal_title"></h3>
             <div class="state-options">
                 <label><input type="checkbox" name="state" value="Clean"> <span data-translate="state_clean"></span></label>
-                <label><input type="checkbox" name="state" value="Scattered"> <span data-translate="state_scattered"></span></label>
-                <label><input type="checkbox" name="state" value="Broken"> <span data-translate="state_broken"></span></label>
-                <label><input type="checkbox" name="state" value="Wet"> <span data-translate="state_wet"></span></label>
+                <label><input type="checkbox" name="state" value="Cluttered"> <span data-translate="state_cluttered"></span></label>
                 <label><input type="checkbox" name="state" value="Risk"> <span data-translate="state_risk"></span></label>
+                <label><input type="checkbox" name="state" value="Wet"> <span data-translate="state_wet"></span></label>
+            </div>
+            <div id="cleanSelectedMessage" class="clean-selected-message" style="display: none;" data-translate="clean_selected_message"></div>
+            <div id="riskDescriptionContainer">
+                <label data-translate="risk_description_label"></label>
+                <textarea id="riskDescription" data-translate-placeholder="risk_description_placeholder"></textarea>
             </div>
             <button id="startDrawingBtn" class="btn" data-translate="start_drawing_button" disabled></button>
         </div>
@@ -224,43 +288,64 @@
         </div>
 
     <script>
-    // --- ★★★ 実験設定 ★★★ --- (変更なし)
+    // --- ★★★ 実験設定 ★★★ ---
     const practiceImages = [ 'images/practice1.jpg', 'images/practice2.jpg', 'images/practice3.jpg', 'images/practice4.jpg' ];
-    const mainImages = ['images/livinglab_clutter.jpg', 'images/living_risk.jpg', 'images/kitchen_clutter_01.png', 'images/kitchen_clutter_02.png', 'images/kitchen_wet_01.png', 'images/kitchen_wet_02.png', 'images/student_space_risk_01.png', 'images/student_space_risk_02.png', 'images/student_space_risk_03.png', 'images/student_space_risk_04.png' ];
-    const a_gas_url = 'https://script.google.com/macros/s/AKfycbzO-eA9nXtnTD3jSLdvDiagWK2xQZ1wotjPWOTpOrFakRkZKrlP1sdv5aGeUWV4gCFRWg/exec';
-
-    // --- テキスト管理 --- (変更なし)
+    // 本番画像を30枚に拡張（既存の10枚 + 20枚のプレースホルダー）
+    // 実際の画像ファイル名に合わせて変更してください
+    const mainImages = [
+        'images/livinglab_clutter.jpg', 
+        'images/living_risk.jpg', 
+        'images/kitchen_clutter_01.png', 
+        'images/kitchen_clutter_02.png', 
+        'images/kitchen_wet_01.png', 
+        'images/kitchen_wet_02.png', 
+        'images/student_space_risk_01.png', 
+        'images/student_space_risk_02.png', 
+        'images/student_space_risk_03.png', 
+        'images/student_space_risk_04.png',
+        // 以下、実際の画像ファイル名に置き換えてください
+    ];
+    const a_gas_url = 'https://script.google.com/macros/s/AKfycbxTPfq1UWDvdNvO2h7GPbynal-QuByMJfLxukteTt_kUk__Af75pclJmJkJlB9ErvWV/exec'
+    // --- テキスト管理 ---
     const translations = {
         welcome_title: { ja: "フィードバック実験へようこそ", en: "Welcome to the Feedback Experiment" },
         welcome_intro: { ja: "この実験にご協力いただき、ありがとうございます。以下の説明をよくお読みの上、ご参加ください。", en: "Thank you for participating in this experiment. Please read the instructions below carefully before you begin." },
+        name_label: { ja: "お名前", en: "Your Name" },
+        name_placeholder: { ja: "氏名を入力してください", en: "Please enter your name" },
         overview_title: { ja: "実験の概要", en: "Experiment Overview" },
         overview_list: {
-            ja: `<li>合計12枚（練習4枚、本番8枚）の画像を見て、特定の状態が感じられる箇所を四角形で囲っていただきます。</li><li>対象となる状態は <strong>{清潔, 散乱, 濡れ, 壊れている, リスクがある}</strong> の5つです。</li><li>1つの箇所に対して、複数の状態を定義することも可能です。（例：「濡れていてリスクがある」など）</li>`,
-            en: `<li>You will be shown a total of 12 images (4 for practice, 8 for the main task). For each image, you will draw rectangles around areas where you perceive certain states.</li><li>The states are: <strong>{Clean, Scattered, Wet, Broken, Risk}</strong>.</li><li>It is possible to define multiple states for the same area (e.g., an area can be both "Wet" and a "Risk").</li>`
+            ja: `<li>合計34枚（練習4枚、本番30枚）の画像を見て、特定の状態が最も強く感じられる箇所を四角形で囲っていただきます。</li><li>対象となる状態は <strong>{清潔, 散らかっている, 濡れている, 何らかのリスクがある}</strong> の4つです。</li><li>各状態について、最も強く感じる箇所を<strong>1つだけ</strong>選択してください。</li><li>「清潔」が選択された場合は、他のカテゴリを選択できず、自動的に次の画像に進みます。</li><li>「何らかのリスクがある」が選択された場合は、どのようなリスクかを自由記述で入力し、バウンディングボックスを描画してください。</li>`,
+            en: `<li>You will be shown a total of 34 images (4 for practice, 30 for the main task). For each image, you will draw a rectangle around the area where you most strongly perceive a certain state.</li><li>The states are: <strong>{Clean, Cluttered, Wet, Risk}</strong>.</li><li>For each state, please select <strong>only one</strong> area where you most strongly feel that state.</li><li>If "Clean" is selected, you cannot select other categories and will automatically proceed to the next image.</li><li>If "Risk" is selected, please describe what kind of risk it is in free text and draw a bounding box.</li>`
         },
         how_to_title: { ja: "操作方法", en: "How to Operate" },
         how_to_list: {
-            ja: `<li>「マッピング」ボタンを押し、画像から感じる状態を複数選択します。</li><li>「描画を開始」ボタンを押します。</li><li>指示に従い、該当する箇所をマウスでドラッグして四角で囲みます。</li><li>選択した全ての状態について描画が完了すると、データが自動で保存され、次の画像に進みます。</li>`,
-            en: `<li>Click the "Mapping" button and select one or more states you perceive in the image.</li><li>Click the "Start Drawing" button.</li><li>Follow the instructions to draw a rectangle by dragging your mouse over the corresponding area.</li><li>Once you have drawn areas for all selected states, the data will be saved automatically, and you will proceed to the next image.</li>`
+            ja: `<li>「状態の選択」ボタンを押し、画像から感じる状態を複数選択します。</li><li>「描画を開始」ボタンを押します。</li><li>指示に従い、最も強く感じる箇所をマウスでドラッグして四角で囲みます（各状態につき1つのみ）。</li><li>「清潔」が選択された場合は、他のカテゴリは選択できず、自動的に次の画像に進みます。</li><li>「何らかのリスクがある」が選択された場合は、リスクの詳細を入力し、バウンディングボックスを描画してください。</li><li>選択した全ての状態について処理が完了すると、データが自動で保存され、次の画像に進みます。</li>`,
+            en: `<li>Click the "Select State" button and select one or more states you perceive in the image.</li><li>Click the "Start Drawing" button.</li><li>Follow the instructions to draw a rectangle by dragging your mouse over the area where you most strongly feel that state (one per state).</li><li>If "Clean" is selected, other categories cannot be selected and you will automatically proceed to the next image.</li><li>If "Risk" is selected, please enter the risk description and draw a bounding box.</li><li>Once you have completed processing for all selected states, the data will be saved automatically, and you will proceed to the next image.</li>`
         },
         start_button: { ja: "練習を開始する", en: "Start Practice" },
-        mapping_button: { ja: "マッピング", en: "Mapping" },
+        mapping_button: { ja: "状態の選択", en: "Select State" },
         back_to_selection: { ja: "状態の選択に戻る", en: "Back to Selection" },
-        undo_button: { ja: "一つ前に戻る", en: "Undo" },
+        undo_button: { ja: "1つ前に戻る", en: "Undo" },
         modal_title: { ja: "あなたの感じる状態を選択してください (複数選択可)", en: "Select the state(s) you perceive (multiple selections allowed)" },
         state_clean: { ja: "清潔", en: "Clean" },
-        state_scattered: { ja: "散乱", en: "Scattered" },
-        state_broken: { ja: "壊れている", en: "Broken" },
-        state_wet: { ja: "濡れ", en: "Wet" },
-        state_risk: { ja: "リスクがある", en: "Risk" },
+        state_cluttered: { ja: "散らかっている", en: "Cluttered" },
+        state_risk: { ja: "何らかのリスクがある", en: "Risk" },
+        state_wet: { ja: "濡れている", en: "Wet" },
+        clean_selected_message: { ja: "「清潔」が選択されました。他のカテゴリは選択できません。このまま次の画像に進みます。", en: "Clean is selected. Other categories cannot be selected. You will proceed to the next image." },
+        risk_description_label: { ja: "リスクの詳細（どのようなリスクか記述してください）", en: "Risk Description (Please describe what kind of risk)" },
+        risk_description_placeholder: { ja: "リスクの内容を入力してください", en: "Please describe the risk" },
+        // 1. translationsオブジェクトに新しい翻訳キーを追加（358行目あたり）
         start_drawing_button: { ja: "描画を開始", en: "Start Drawing" },
+        next_button: { ja: "次へ進む", en: "Next" },  // ← この行を追加
         session_practice: { ja: "練習セッション", en: "Practice Session" },
         session_main: { ja: "本番セッション", en: "Main Session" },
         instruction_image: { ja: (current, total) => `画像 ${current} / ${total}`, en: (current, total) => `Image ${current} / ${total}` },
-        instruction_draw: { ja: (state) => `【${state}】と感じる部分を四角で囲ってください。`, en: (state) => `Please draw a rectangle around the area you feel is [${state}].` },
+        instruction_draw: { ja: (state) => `【${state}】と最も強く感じる部分を四角で囲ってください（1つのみ）。`, en: (state) => `Please draw a rectangle around the area where you most strongly feel [${state}] (one only).` },
+        instruction_clean: { ja: "「清潔」が選択されました。次の状態に進みます。", en: "Clean is selected. Proceeding to the next state." },
         alert_practice_end: { ja: "練習はこれで終わりです。次に本番のセッションを開始します。", en: "The practice session is now complete. The main session will begin next." },
         alert_experiment_end: { ja: "全ての実験が終了しました。ご協力ありがとうございました。", en: "The experiment is now finished. Thank you for your cooperation." },
         alert_select_state: { ja: "少なくとも1つの状態を選択してください。", en: "Please select at least one state." },
+        alert_risk_description_required: { ja: "リスクが選択された場合は、リスクの詳細を入力してください。", en: "Please enter a risk description when Risk is selected." },
         status_saving: { ja: "データを保存中...", en: "Saving data..." },
         status_save_complete: { ja: "データの保存が完了しました。", en: "Save complete." },
         status_save_error: { ja: "エラー：データの保存に失敗しました。", en: "Error: Failed to save data." },
@@ -272,16 +357,22 @@
     };
     let currentLang = 'ja';
 
-    // --- 言語切替機能 --- (変更なし)
+    // --- 言語切替機能 ---
     function setLanguage(lang) {
-        currentLang = lang; document.documentElement.lang = lang;
+        currentLang = lang; 
+        document.documentElement.lang = lang;
         document.querySelectorAll('[data-translate]').forEach(el => {
             const key = el.dataset.translate;
-            if (translations[key] && translations[key][lang]) { el.innerHTML = translations[key][lang]; }
+            if (translations[key] && translations[key][lang]) { 
+                el.innerHTML = translations[key][lang]; 
+            }
         });
-        document.querySelectorAll('.state-options input[type="checkbox"]').forEach(checkbox => {
-            const stateKey = `state_${checkbox.nextElementSibling.dataset.translate.split('_')[1]}`;
-            if (translations[stateKey]) { checkbox.value = translations[stateKey]['en']; }
+        // プレースホルダーの処理
+        document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-translate-placeholder');
+            if (translations[key] && translations[key][lang]) {
+                el.placeholder = translations[key][lang];
+            }
         });
     }
     document.getElementById('lang-ja').addEventListener('click', () => setLanguage('ja'));
@@ -291,10 +382,10 @@
     const startScreen = document.getElementById('start-screen');
     const experimentScreen = document.getElementById('experiment-screen');
     const startExperimentBtn = document.getElementById('start-experiment-btn');
+    const participantNameInput = document.getElementById('participantName');
     const sessionTitle = document.getElementById('session-title');
     const mainImage = document.getElementById('mainImage');
     const mappingBtn = document.getElementById('mappingBtn');
-    const backToSelectionBtn = document.getElementById('backToSelectionBtn');
     const undoBtn = document.getElementById('undoBtn');
     const stateSelectionPanel = document.getElementById('stateSelectionPanel');
     const closeSelectionPanelBtn = document.getElementById('closeSelectionPanelBtn');
@@ -305,62 +396,164 @@
     const confirmDialog = document.getElementById('confirmDialog');
     const confirmYes = document.getElementById('confirmYes');
     const confirmNo = document.getElementById('confirmNo');
-    let currentImageList = [], currentImageIndex = 0, isPractice = true, selectedStates = [], currentStateIndex = 0, annotations = {}, drawnRects = [], isDrawing = false, startX, startY, isDrawingMode = false, pendingRect = null;
+    const riskDescriptionContainer = document.getElementById('riskDescriptionContainer');
+    const riskDescriptionTextarea = document.getElementById('riskDescription');
+    const cleanSelectedMessage = document.getElementById('cleanSelectedMessage');
     const checkboxes = document.querySelectorAll('.state-options input[type="checkbox"]');
+    
+    let participantName = '';
+    let currentImageList = [];
+    let currentImageIndex = 0;
+    let isPractice = true;
+    let selectedStates = [];
+    let currentStateIndex = 0;
+    let annotations = {};
+    let riskDescriptions = {}; // Riskの記述を保存
+    let drawnRects = [];
+    let isDrawing = false;
+    let startX, startY;
+    let isDrawingMode = false;
+    let pendingRect = null;
+    let isCleanOnly = false; // Cleanのみが選択されたかどうかのフラグ
 
-    // --- ▼▼▼ ボタン状態管理のロジック ▼▼▼ ---
+    // --- 氏名入力チェック ---
+    participantNameInput.addEventListener('input', () => {
+        participantName = participantNameInput.value.trim();
+        startExperimentBtn.disabled = !participantName;
+    });
+
+    // --- Clean選択時の処理（他のカテゴリを無効化）---
+// 2. handleCleanSelection関数を修正（445-475行目あたり）
+    // --- Clean選択時の処理（他のカテゴリを無効化）---
+    function handleCleanSelection(isCleanChecked) {
+        if (isCleanChecked) {
+            // Cleanが選択された場合
+            isCleanOnly = true;
+            cleanSelectedMessage.style.display = 'block';
+            // 他のチェックボックスを無効化
+            checkboxes.forEach(cb => {
+                if (cb.value !== 'Clean') {
+                    cb.disabled = true;
+                    cb.checked = false;
+                }
+            });
+            // リスク記述欄を非表示
+            riskDescriptionContainer.classList.remove('visible');
+            riskDescriptionTextarea.value = '';
+            // 描画開始ボタンを有効化
+            startDrawingBtn.disabled = false;
+            // ボタンテキストを「次へ進む」に変更
+            startDrawingBtn.setAttribute('data-translate', 'next_button');
+            setLanguage(currentLang);
+        } else {
+            // Cleanが選択解除された場合
+            isCleanOnly = false;
+            cleanSelectedMessage.style.display = 'none';
+            // 他のチェックボックスを再有効化
+            checkboxes.forEach(cb => {
+                if (cb.value !== 'Clean') {
+                    cb.disabled = false;
+                }
+            });
+            // ボタン状態を更新
+            updateStartDrawingButtonState();
+            // ボタンテキストを「描画を開始」に戻す
+            startDrawingBtn.setAttribute('data-translate', 'start_drawing_button');
+            setLanguage(currentLang);
+        }
+    }
+
+    // --- Risk選択時のリスク記述表示/非表示 ---
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            if (checkbox.value === 'Clean') {
+                handleCleanSelection(checkbox.checked);
+            } else if (!isCleanOnly) {
+                // Cleanが選択されていない場合のみ処理
+                updateStartDrawingButtonState();
+                // Riskが選択された場合、リスク記述欄を表示
+                if (checkbox.value === 'Risk' && checkbox.checked) {
+                    riskDescriptionContainer.classList.add('visible');
+                } else if (checkbox.value === 'Risk' && !checkbox.checked) {
+                    riskDescriptionContainer.classList.remove('visible');
+                    riskDescriptionTextarea.value = '';
+                }
+            }
+        });
+    });
+
+    // --- ボタン状態管理のロジック ---
     function updateStartDrawingButtonState() {
-        const isAnyChecked = Array.from(checkboxes).some(cb => cb.checked);
+        const isAnyChecked = Array.from(checkboxes).some(cb => cb.checked && !cb.disabled);
         startDrawingBtn.disabled = !isAnyChecked;
     }
 
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateStartDrawingButtonState);
-    });
-    // --- ▲▲▲ ボタン状態管理のロジック ▲▲▲ ---
-
     // --- 実験フロー ---
     startExperimentBtn.addEventListener('click', () => {
+        participantName = participantNameInput.value.trim();
+        if (!participantName) {
+            alert('氏名を入力してください。');
+            return;
+        }
         startScreen.style.display = 'none';
         experimentScreen.style.display = 'flex';
         startSession(true);
     });
 
     mappingBtn.addEventListener('click', () => {
-        console.log('mappingBtn clicked, isDrawingMode:', isDrawingMode); // デバッグ用
+        console.log('mappingBtn clicked, isDrawingMode:', isDrawingMode);
     
-    // 描画中の場合（canvas が表示されている場合）
-       // 描画中の場合
-       if (isDrawingMode) {
-        console.log('Drawing mode detected, stopping drawing'); // デバッグ用
-        // 描画を中断して状態選択に戻る
-        canvas.style.display = 'none';
-        stateSelectionPanel.classList.add('visible');
-        isDrawingMode = false; // フラグをリセット
-        
-        // ボタンテキストを「マッピング」に戻す
-        mappingBtn.setAttribute('data-translate', 'mapping_button');
-        setLanguage(currentLang);
-        
-        // 戻るボタンを非表示にする
-        undoBtn.style.display = 'none';
-        instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
-        
-        
-        // 描画状態をリセット
-        drawnRects = [];
-        currentStateIndex = 0;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        return;
-    }
+        // 描画中の場合
+        if (isDrawingMode) {
+            console.log('Drawing mode detected, stopping drawing');
+            // 描画を中断して状態選択に戻る
+            canvas.style.display = 'none';
+            stateSelectionPanel.classList.add('visible');
+            isDrawingMode = false;
+            
+            // ボタンテキストを「マッピング」に戻す
+            mappingBtn.setAttribute('data-translate', 'mapping_button');
+            setLanguage(currentLang);
+            
+            // 戻るボタンを非表示にする
+            undoBtn.style.display = 'none';
+            instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
+            
+            // 描画状態をリセット
+            drawnRects = [];
+            currentStateIndex = 0;
+            annotations = {};
+            riskDescriptions = {};
+            isCleanOnly = false;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Clean選択状態をリセット
+            cleanSelectedMessage.style.display = 'none';
+            checkboxes.forEach(cb => {
+                cb.checked = false;
+                cb.disabled = false;
+            });
+            // ボタンテキストを「描画を開始」に戻す
+            startDrawingBtn.setAttribute('data-translate', 'start_drawing_button');
+            setLanguage(currentLang);
+            
+            return;
+        }
 
-        console.log('Normal mapping process'); // デバッグ用
+        console.log('Normal mapping process');
 
         // 通常のマッピング処理
         stateSelectionPanel.classList.add('visible');
         mappingBtn.disabled = true;
         updateStartDrawingButtonState();
+        // Cleanが選択されているかどうかでボタンテキストを設定
+        const cleanChecked = Array.from(checkboxes).find(cb => cb.value === 'Clean' && cb.checked);
+        if (cleanChecked && isCleanOnly) {
+            startDrawingBtn.setAttribute('data-translate', 'next_button');
+        } else {
+            startDrawingBtn.setAttribute('data-translate', 'start_drawing_button');
+        }
+        setLanguage(currentLang);
         stateSelectionPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
@@ -368,13 +561,39 @@
         stateSelectionPanel.classList.remove('visible');
         mappingBtn.disabled = false;
         document.querySelectorAll('input[name="state"]:checked').forEach(cb => cb.checked = false);
-        updateStartDrawingButtonState(); // パネルを閉じる時もボタンの状態をリセット
+        checkboxes.forEach(cb => cb.disabled = false);
+        riskDescriptionContainer.classList.remove('visible');
+        riskDescriptionTextarea.value = '';
+        cleanSelectedMessage.style.display = 'none';
+        isCleanOnly = false;
+        // ボタンテキストを「描画を開始」に戻す
+        startDrawingBtn.setAttribute('data-translate', 'start_drawing_button');
+        setLanguage(currentLang);
+        updateStartDrawingButtonState();
     });
 
     startDrawingBtn.addEventListener('click', () => {
-        console.log('startDrawingBtn clicked'); // デバッグ用
+        console.log('startDrawingBtn clicked');
     
         if (startDrawingBtn.disabled) return;
+        
+        // Cleanのみが選択されている場合
+        const cleanChecked = Array.from(checkboxes).find(cb => cb.value === 'Clean' && cb.checked);
+        if (cleanChecked && isCleanOnly) {
+            // Cleanのみが選択されている場合、他の状態は選択されていないので、すぐに次の画像に進む
+            selectedStates = ['Clean'];
+            annotations = {};
+            riskDescriptions = {};
+            finishMapping();
+            return;
+        }
+        
+        // Riskが選択されている場合、リスク記述が入力されているかチェック
+        const riskChecked = Array.from(checkboxes).find(cb => cb.value === 'Risk' && cb.checked);
+        if (riskChecked && !riskDescriptionTextarea.value.trim()) {
+            alert(translations.alert_risk_description_required[currentLang]);
+            return;
+        }
         
         stateSelectionPanel.classList.remove('visible');
         
@@ -382,29 +601,52 @@
         mappingBtn.setAttribute('data-translate', 'back_to_selection');
         setLanguage(currentLang);
         
-        selectedStates = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+        selectedStates = Array.from(checkboxes).filter(cb => cb.checked && !cb.disabled).map(cb => cb.value);
         currentStateIndex = 0;
         drawnRects = [];
+        annotations = {};
+        riskDescriptions = {};
+        
+        // Riskが選択されている場合、リスク記述を保存
+        if (riskChecked) {
+            riskDescriptions['Risk'] = riskDescriptionTextarea.value.trim();
+        }
+        
+        // Cleanを除外して描画が必要な状態のみを処理（Riskは描画対象に含める）
+        selectedStates = selectedStates.filter(state => state !== 'Clean');
+        
+        // 描画が必要な状態がない場合（Cleanのみが選択された場合）
+        if (selectedStates.length === 0) {
+            finishMapping();
+            return;
+        }
         
         canvas.style.display = 'block';
         undoBtn.style.display = 'block';
         undoBtn.disabled = false;
-        isDrawingMode = true; // フラグを設定
+        isDrawingMode = true;
         
-        // mappingBtn を有効にする（重要！）
+        // mappingBtn を有効にする
         mappingBtn.disabled = false;
     
-        console.log('isDrawingMode set to:', isDrawingMode); // デバッグ用
+        console.log('isDrawingMode set to:', isDrawingMode);
     
         startDrawingForCurrentState();
-        });
+    });
 
     function resetForNextImage(delay) {
         setTimeout(() => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             canvas.style.display = 'none';
             stateSelectionPanel.classList.remove('visible');
-            checkboxes.forEach(cb => cb.checked = false);
+            checkboxes.forEach(cb => {
+                cb.checked = false;
+                cb.disabled = false;
+            });
+            riskDescriptionContainer.classList.remove('visible');
+            riskDescriptionTextarea.value = '';
+            cleanSelectedMessage.style.display = 'none';
+            isCleanOnly = false;
             
             currentImageIndex++;
             loadImage();
@@ -416,31 +658,39 @@
         setLanguage('ja');
     });
 
-    // --- ▼▼▼ 以下、変更不要な関数群 ▼▼▼ ---
+    // --- セッション開始 ---
     function startSession(isPracticeSession) {
-        isPractice = isPracticeSession; currentImageIndex = 0;
+        isPractice = isPracticeSession; 
+        currentImageIndex = 0;
         if (isPractice) {
-            sessionTitle.textContent = translations.session_practice[currentLang]; currentImageList = practiceImages;
+            sessionTitle.textContent = translations.session_practice[currentLang]; 
+            currentImageList = practiceImages;
         } else {
-            sessionTitle.textContent = translations.session_main[currentLang]; currentImageList = mainImages;
+            sessionTitle.textContent = translations.session_main[currentLang]; 
+            currentImageList = mainImages;
         }
         loadImage();
     }
+    
     function loadImage() {
         if (currentImageIndex >= currentImageList.length) {
             if (isPractice) {
-                alert(translations.alert_practice_end[currentLang]); startSession(false);
+                alert(translations.alert_practice_end[currentLang]); 
+                startSession(false);
             } else {
                 experimentScreen.innerHTML = `<h1>${translations.alert_experiment_end[currentLang]}</h1>`;
             }
             return;
         }
         const imageName = currentImageList[currentImageIndex];
-        mainImage.crossOrigin = "Anonymous"; mainImage.src = imageName;
+        mainImage.crossOrigin = "Anonymous"; 
+        mainImage.src = imageName;
         mainImage.onload = () => {
             const container = document.querySelector('.image-container');
-            canvas.width = mainImage.naturalWidth; canvas.height = mainImage.naturalHeight;
-            container.style.width = mainImage.clientWidth + 'px'; container.style.height = mainImage.clientHeight + 'px';
+            canvas.width = mainImage.naturalWidth; 
+            canvas.height = mainImage.naturalHeight;
+            container.style.width = mainImage.clientWidth + 'px'; 
+            container.style.height = mainImage.clientHeight + 'px';
         };
         mappingBtn.disabled = false;
         undoBtn.style.display = 'none';
@@ -449,10 +699,31 @@
         confirmDialog.style.display = 'none';
         pendingRect = null;
         
+        // 状態をリセット
+        annotations = {};
+        riskDescriptions = {};
+        drawnRects = [];
+        currentStateIndex = 0;
+        isCleanOnly = false;
+        cleanSelectedMessage.style.display = 'none';
+        checkboxes.forEach(cb => {
+            cb.checked = false;
+            cb.disabled = false;
+        });
+        riskDescriptionContainer.classList.remove('visible');
+        riskDescriptionTextarea.value = '';
+        // ボタンテキストを「描画を開始」に戻す
+        startDrawingBtn.setAttribute('data-translate', 'start_drawing_button');
+        setLanguage(currentLang);
+        
         instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
     }
+    
     function startDrawingForCurrentState() {
-        if (currentStateIndex >= selectedStates.length) { finishMapping(); return; }
+        if (currentStateIndex >= selectedStates.length) { 
+            finishMapping(); 
+            return; 
+        }
         const currentState = selectedStates[currentStateIndex];
         instruction.textContent = translations.instruction_draw[currentLang](currentState);
         canvas.addEventListener('mousedown', onMouseDown);
@@ -462,15 +733,18 @@
 
     undoBtn.addEventListener('click', () => {
         if (currentStateIndex === 0) return;
-        currentStateIndex--; const lastState = selectedStates[currentStateIndex];
-        delete annotations[lastState]; drawnRects.pop(); redrawCanvas();
+        currentStateIndex--; 
+        const lastState = selectedStates[currentStateIndex];
+        delete annotations[lastState]; 
+        drawnRects.pop(); 
+        redrawCanvas();
         instruction.textContent = translations.instruction_draw[currentLang](lastState);
     });
 
     // 確認ダイアログのイベントハンドラー
     confirmYes.addEventListener('click', () => {
         if (pendingRect) {
-            // 四角形を確定
+            // 四角形を確定（各状態につき1つのみ）
             annotations[pendingRect.state] = pendingRect.rect;
             drawnRects.push(pendingRect.rect);
             currentStateIndex++;
@@ -503,6 +777,7 @@
         // 現在の状態の描画を再開（同じ状態をもう一度描画）
         instruction.textContent = translations.instruction_draw[currentLang](selectedStates[currentStateIndex]);
     });
+    
     function finishMapping() {
         instruction.textContent = translations.status_saving[currentLang];
         canvas.removeEventListener('mousedown', onMouseDown);
@@ -511,56 +786,99 @@
         
         // ボタンテキストを「マッピング」に戻す
         mappingBtn.setAttribute('data-translate', 'mapping_button');
-        setLanguage(currentLang); // 翻訳を更新
+        setLanguage(currentLang);
         
         // 戻るボタンを非表示にする
         undoBtn.style.display = 'none';
-        isDrawingMode = false; // フラグをリセット
+        isDrawingMode = false;
         
         // 全てのボタンを無効化（次の画像遷移まで）
         mappingBtn.disabled = true;
         undoBtn.disabled = true;
         
         if (isPractice) {
-            console.log("Practice data:", { imageName: currentImageList[currentImageIndex], annotations: annotations });
+            console.log("Practice data:", { 
+                participantName: participantName,
+                imageName: currentImageList[currentImageIndex], 
+                annotations: annotations,
+                riskDescriptions: riskDescriptions
+            });
             instruction.textContent = translations.status_practice_complete[currentLang];
             resetForNextImage(1500);
-        } else { saveDataToServer(); }
+        } else { 
+            saveDataToServer(); 
+        }
     }
+    
     function saveDataToServer() {
         if (!a_gas_url || a_gas_url.includes('貼り付け')) {
             console.error("GAS URL is not set.");
             instruction.textContent = "Error: Submission URL is not configured.";
-            resetForNextImage(2000); return;
+            resetForNextImage(2000); 
+            return;
         }
-        const dataToSend = { imageName: currentImageList[currentImageIndex], annotations: annotations, imageDataUrl: getAnnotatedImageDataUrl() };
-        fetch(a_gas_url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSend)})
-        .then(() => { instruction.textContent = translations.status_save_complete[currentLang]; })
-        .catch(error => { console.error('Data submission failed:', error); instruction.textContent = translations.status_save_error[currentLang]; })
-        .finally(() => { resetForNextImage(2000); });
+        const dataToSend = { 
+            participantName: participantName,
+            imageName: currentImageList[currentImageIndex], 
+            annotations: annotations, 
+            riskDescriptions: riskDescriptions,
+            imageDataUrl: getAnnotatedImageDataUrl() 
+        };
+        fetch(a_gas_url, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify(dataToSend)
+        })
+        .then(() => { 
+            instruction.textContent = translations.status_save_complete[currentLang]; 
+        })
+        .catch(error => { 
+            console.error('Data submission failed:', error); 
+            instruction.textContent = translations.status_save_error[currentLang]; 
+        })
+        .finally(() => { 
+            resetForNextImage(2000); 
+        });
     }
+    
     function redrawCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.strokeStyle = 'red'; ctx.lineWidth = 3;
-        drawnRects.forEach(rect => { ctx.strokeRect(rect.x, rect.y, rect.width, rect.height); });
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
+        ctx.strokeStyle = 'red'; 
+        ctx.lineWidth = 3;
+        drawnRects.forEach(rect => { 
+            ctx.strokeRect(rect.x, rect.y, rect.width, rect.height); 
+        });
     }
+    
     function onMouseDown(e) {
-        isDrawing = true; const rect = canvas.getBoundingClientRect();
+        isDrawing = true; 
+        const rect = canvas.getBoundingClientRect();
         startX = (e.clientX - rect.left) * (canvas.width / rect.width);
         startY = (e.clientY - rect.top) * (canvas.height / rect.height);
     }
+    
     function onMouseMove(e) {
-        if (!isDrawing) return; const rect = canvas.getBoundingClientRect();
+        if (!isDrawing) return; 
+        const rect = canvas.getBoundingClientRect();
         const currentX = (e.clientX - rect.left) * (canvas.width / rect.width);
         const currentY = (e.clientY - rect.top) * (canvas.height / rect.height);
-        redrawCanvas(); ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
+        redrawCanvas(); 
+        ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
     }
+    
     function onMouseUp(e) {
         if (!isDrawing) return; 
         isDrawing = false; 
         const rect = canvas.getBoundingClientRect();
         const endX = (e.clientX - rect.left) * (canvas.width / rect.width);
         const endY = (e.clientY - rect.top) * (canvas.height / rect.height);
-        const newRect = { x: Math.min(startX, endX), y: Math.min(startY, endY), width: Math.abs(endX - startX), height: Math.abs(endY - startY) };
+        const newRect = { 
+            x: Math.min(startX, endX), 
+            y: Math.min(startY, endY), 
+            width: Math.abs(endX - startX), 
+            height: Math.abs(endY - startY) 
+        };
         
         // 四角形が小さすぎる場合は無視
         if (newRect.width < 5 || newRect.height < 5) {
@@ -577,11 +895,18 @@
         mappingBtn.disabled = true;
         undoBtn.disabled = true;
     }
+    
     function getAnnotatedImageDataUrl() {
-        const tempCanvas = document.createElement('canvas'); tempCanvas.width = mainImage.naturalWidth; tempCanvas.height = mainImage.naturalHeight;
-        const tempCtx = tempCanvas.getContext('2d'); tempCtx.drawImage(mainImage, 0, 0);
-        tempCtx.strokeStyle = 'lime'; tempCtx.lineWidth = 5;
-        Object.values(annotations).forEach(rect => { tempCtx.strokeRect(rect.x, rect.y, rect.width, rect.height); });
+        const tempCanvas = document.createElement('canvas'); 
+        tempCanvas.width = mainImage.naturalWidth; 
+        tempCanvas.height = mainImage.naturalHeight;
+        const tempCtx = tempCanvas.getContext('2d'); 
+        tempCtx.drawImage(mainImage, 0, 0);
+        tempCtx.strokeStyle = 'lime'; 
+        tempCtx.lineWidth = 5;
+        Object.values(annotations).forEach(rect => { 
+            tempCtx.strokeRect(rect.x, rect.y, rect.width, rect.height); 
+        });
         return tempCanvas.toDataURL('image/png');
     }
 
