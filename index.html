@@ -93,9 +93,8 @@
             transform: none;
             box-shadow: none;
         }
-        /* --- ▼▼▼ UI改善のためのCSS変更箇所 ▼▼▼ --- */
         #stateSelectionPanel {
-            display: none; /* 最初は非表示 */
+            display: none;
             flex-direction: column;
             align-items: center;
             width: 800px;
@@ -125,18 +124,14 @@
 
         
         #stateSelectionPanel.visible {
-            display: flex; /* 表示する時はflexに */
+            display: flex;
         }
         .state-options {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2列で表示（4つの選択肢のため） */
-            gap: 10px 20px; /* 縦横の間隔 */
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px 20px;
             width: 100%;
             margin: 15px 0;
-        }
-        .state-options input[type="checkbox"]:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
         }
         #riskDescriptionContainer {
             display: none;
@@ -164,25 +159,15 @@
         #startDrawingBtn {
             margin-top: 10px;
         }
-        .clean-selected-message {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #e7f3ff;
-            border: 1px solid #b3d9ff;
-            border-radius: 5px;
-            color: #0066cc;
-            font-weight: bold;
-        }
-        /* --- ▲▲▲ UI改善のためのCSS変更箇所 ▲▲▲ --- */
+
         #instruction {
             margin-top: 10px; font-weight: bold;
             color: #d9534f; height: 20px;
         }
         #undoBtn {
-            display: none; /* 初期状態で非表示 */
+            display: none;
         }
         
-        /* 確認ダイアログのスタイル */
         #confirmDialog {
             position: fixed;
             top: 0;
@@ -254,6 +239,7 @@
         <div class="controls">
             <button id="mappingBtn" class="btn" data-translate="mapping_button"></button>
             <button id="undoBtn" class="btn" data-translate="undo_button" disabled></button>
+            <button id="skipBtn" class="btn" data-translate="skip_button" disabled></button>
         </div>
         <div id="instruction"></div>
 
@@ -266,7 +252,6 @@
                 <label><input type="checkbox" name="state" value="Risk"> <span data-translate="state_risk"></span></label>
                 <label><input type="checkbox" name="state" value="Wet"> <span data-translate="state_wet"></span></label>
             </div>
-            <div id="cleanSelectedMessage" class="clean-selected-message" style="display: none;" data-translate="clean_selected_message"></div>
             <div id="riskDescriptionContainer">
                 <label data-translate="risk_description_label"></label>
                 <textarea id="riskDescription" data-translate-placeholder="risk_description_placeholder"></textarea>
@@ -274,7 +259,6 @@
             <button id="startDrawingBtn" class="btn" data-translate="start_drawing_button" disabled></button>
         </div>
         
-        <!-- 確認ダイアログ -->
         <div id="confirmDialog" style="display: none;">
             <div class="dialog-content">
                 <h3 data-translate="confirm_title"></h3>
@@ -289,12 +273,12 @@
 
     <script>
     // --- ★★★ 実験設定 ★★★ ---
-    const practiceImages = [ 'images/practice/coffee-spilled-workspace.jpg', 
-    'images/practice/coffee-spilled-workspace.jpg', 
-    'images/practice/nyu_image_0001.jpg',
-     'images/practice/nyu_image_0069.jpg' ];
-    // 本番画像を30枚に拡張（既存の10枚 + 20枚のプレースホルダー）
-    // 実際の画像ファイル名に合わせて変更してください
+    const practiceImages = [ 
+        'images/practice/coffee-spilled-workspace.jpg', 
+        'images/practice/coffee-spilled-workspace.jpg', 
+        'images/practice/nyu_image_0001.jpg',
+        'images/practice/nyu_image_0069.jpg' 
+    ];
     const mainImages = [
         'images/validate/nyu_image_0000.jpg', 
         'images/validate/nyu_image_0004.jpg', 
@@ -305,9 +289,9 @@
         'images/validate/nyu_image_0336.jpg',
         'images/validate/nyu_image_0928.jpg',
         'images/validate/nyu_image_1060.jpg',
-        // 以下、実際の画像ファイル名に置き換えてください
     ];
-    const a_gas_url = 'https://script.google.com/macros/s/AKfycbxTPfq1UWDvdNvO2h7GPbynal-QuByMJfLxukteTt_kUk__Af75pclJmJkJlB9ErvWV/exec'
+    const a_gas_url = 'https://script.google.com/macros/s/AKfycbxTPfq1UWDvdNvO2h7GPbynal-QuByMJfLxukteTt_kUk__Af75pclJmJkJlB9ErvWV/exec';
+    
     // --- テキスト管理 ---
     const translations = {
         welcome_title: { ja: "フィードバック実験へようこそ", en: "Welcome to the Feedback Experiment" },
@@ -316,34 +300,32 @@
         name_placeholder: { ja: "氏名を入力してください", en: "Please enter your name" },
         overview_title: { ja: "実験の概要", en: "Experiment Overview" },
         overview_list: {
-            ja: `<li>合計34枚（練習4枚、本番30枚）の画像を見て、特定の状態が最も強く感じられる箇所を四角形で囲っていただきます。</li><li>対象となる状態は <strong>{清潔, 散らかっている, 濡れている, 何らかのリスクがある}</strong> の4つです。</li><li>各状態について、最も強く感じる箇所を<strong>1つだけ</strong>選択してください。</li><li>「清潔」が選択された場合は、他のカテゴリを選択できず、自動的に次の画像に進みます。</li><li>「何らかのリスクがある」が選択された場合は、どのようなリスクかを自由記述で入力し、バウンディングボックスを描画してください。</li>`,
-            en: `<li>You will be shown a total of 34 images (4 for practice, 30 for the main task). For each image, you will draw a rectangle around the area where you most strongly perceive a certain state.</li><li>The states are: <strong>{Clean, Cluttered, Wet, Risk}</strong>.</li><li>For each state, please select <strong>only one</strong> area where you most strongly feel that state.</li><li>If "Clean" is selected, you cannot select other categories and will automatically proceed to the next image.</li><li>If "Risk" is selected, please describe what kind of risk it is in free text and draw a bounding box.</li>`
+            ja: `<li>合計13枚（練習4枚、本番9枚）の画像を見て、特定の状態が最も強く感じられる箇所を四角形で囲っていただきます。</li><li>対象となる状態は <strong>{清潔, 散らかっている, 濡れている, 何らかのリスクがある}</strong> の4つです。</li><li>各状態について、最も強く感じる箇所を<strong>1つ以上、最大2つまで</strong>選択してください。1つ描画後、「次へ進む」ボタンで次のカテゴリまたは次の画像に進めます。</li><li>複数の状態を同時に選択することができます。</li><li>「何らかのリスクがある」が選択された場合は、どのようなリスクかを自由記述で入力してください。</li>`,
+            en: `<li>You will be shown a total of 13 images (4 for practice, 9 for the main task). For each image, you will draw a rectangle around the area where you most strongly perceive a certain state.</li><li>The states are: <strong>{Clean, Cluttered, Wet, Risk}</strong>.</li><li>For each state, please select <strong>at least 1, up to 2</strong> areas where you most strongly feel that state. After drawing one, you can use the "Skip to Next" button to proceed to the next category or next image.</li><li>You can select multiple states simultaneously.</li><li>If "Risk" is selected, please describe what kind of risk it is in free text.</li>`
         },
         how_to_title: { ja: "操作方法", en: "How to Operate" },
         how_to_list: {
-            ja: `<li>「状態の選択」ボタンを押し、画像から感じる状態を複数選択します。</li><li>「描画を開始」ボタンを押します。</li><li>指示に従い、最も強く感じる箇所をマウスでドラッグして四角で囲みます（各状態につき1つのみ）。</li><li>「清潔」が選択された場合は、他のカテゴリは選択できず、自動的に次の画像に進みます。</li><li>「何らかのリスクがある」が選択された場合は、リスクの詳細を入力し、バウンディングボックスを描画してください。</li><li>選択した全ての状態について処理が完了すると、データが自動で保存され、次の画像に進みます。</li>`,
-            en: `<li>Click the "Select State" button and select one or more states you perceive in the image.</li><li>Click the "Start Drawing" button.</li><li>Follow the instructions to draw a rectangle by dragging your mouse over the area where you most strongly feel that state (one per state).</li><li>If "Clean" is selected, other categories cannot be selected and you will automatically proceed to the next image.</li><li>If "Risk" is selected, please enter the risk description and draw a bounding box.</li><li>Once you have completed processing for all selected states, the data will be saved automatically, and you will proceed to the next image.</li>`
+            ja: `<li>「状態の選択」ボタンを押し、画像から感じる状態を選択します（複数選択可）。</li><li>「描画を開始」ボタンを押します。</li><li>指示に従い、最も強く感じる箇所をマウスでドラッグして四角で囲みます（各状態につき1つ以上、最大2つまで）。</li><li>1つ描画後、「次へ進む」ボタンで次のカテゴリまたは次の画像に進むことができます。2つ目を描きたい場合は、そのまま続けて描画してください。</li><li>「何らかのリスクがある」が選択された場合は、リスクの詳細を入力してください。</li><li>選択した全ての状態について処理が完了すると、データが自動で保存され、次の画像に進みます。</li>`,
+            en: `<li>Click the "Select State" button and select one or more states you perceive in the image.</li><li>Click the "Start Drawing" button.</li><li>Follow the instructions to draw a rectangle by dragging your mouse over the area where you most strongly feel that state (at least 1, up to 2 per state).</li><li>After drawing one, you can use the "Skip to Next" button to proceed to the next category or next image. If you want to draw a second one, continue drawing.</li><li>If "Risk" is selected, please enter the risk description.</li><li>Once you have completed processing for all selected states, the data will be saved automatically, and you will proceed to the next image.</li>`
         },
         start_button: { ja: "練習を開始する", en: "Start Practice" },
         mapping_button: { ja: "状態の選択", en: "Select State" },
         back_to_selection: { ja: "状態の選択に戻る", en: "Back to Selection" },
         undo_button: { ja: "1つ前に戻る", en: "Undo" },
+        skip_button: { ja: "次へ進む", en: "Skip to Next" },
         modal_title: { ja: "あなたの感じる状態を選択してください (複数選択可)", en: "Select the state(s) you perceive (multiple selections allowed)" },
         state_clean: { ja: "清潔", en: "Clean" },
         state_cluttered: { ja: "散らかっている", en: "Cluttered" },
         state_risk: { ja: "何らかのリスクがある", en: "Risk" },
         state_wet: { ja: "濡れている", en: "Wet" },
-        clean_selected_message: { ja: "「清潔」が選択されました。他のカテゴリは選択できません。このまま次の画像に進みます。", en: "Clean is selected. Other categories cannot be selected. You will proceed to the next image." },
         risk_description_label: { ja: "リスクの詳細（どのようなリスクか記述してください）", en: "Risk Description (Please describe what kind of risk)" },
         risk_description_placeholder: { ja: "リスクの内容を入力してください", en: "Please describe the risk" },
-        // 1. translationsオブジェクトに新しい翻訳キーを追加（358行目あたり）
         start_drawing_button: { ja: "描画を開始", en: "Start Drawing" },
-        next_button: { ja: "次へ進む", en: "Next" },  // ← この行を追加
         session_practice: { ja: "練習セッション", en: "Practice Session" },
         session_main: { ja: "本番セッション", en: "Main Session" },
         instruction_image: { ja: (current, total) => `画像 ${current} / ${total}`, en: (current, total) => `Image ${current} / ${total}` },
-        instruction_draw: { ja: (state) => `【${state}】と最も強く感じる部分を四角で囲ってください（1つのみ）。`, en: (state) => `Please draw a rectangle around the area where you most strongly feel [${state}] (one only).` },
-        instruction_clean: { ja: "「清潔」が選択されました。次の状態に進みます。", en: "Clean is selected. Proceeding to the next state." },
+        instruction_draw: { ja: (state, count, max) => `【${state}】と最も強く感じる部分を四角で囲ってください（${count}/${max}）。`, en: (state, count, max) => `Please draw a rectangle around the area where you most strongly feel [${state}] (${count}/${max}).` },
+        instruction_after_one: { ja: (state) => `【${state}】の1つ目を描画しました。もう一つ気になる箇所がある場合は、続けて描画してください。なければ「次へ進む」ボタンを押してください。`, en: (state) => `First [${state}] area drawn. If you have another area of concern, continue drawing. Otherwise, click "Skip to Next".` },
         alert_practice_end: { ja: "練習はこれで終わりです。次に本番のセッションを開始します。", en: "The practice session is now complete. The main session will begin next." },
         alert_experiment_end: { ja: "全ての実験が終了しました。ご協力ありがとうございました。", en: "The experiment is now finished. Thank you for your cooperation." },
         alert_select_state: { ja: "少なくとも1つの状態を選択してください。", en: "Please select at least one state." },
@@ -369,7 +351,6 @@
                 el.innerHTML = translations[key][lang]; 
             }
         });
-        // プレースホルダーの処理
         document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
             const key = el.getAttribute('data-translate-placeholder');
             if (translations[key] && translations[key][lang]) {
@@ -389,6 +370,7 @@
     const mainImage = document.getElementById('mainImage');
     const mappingBtn = document.getElementById('mappingBtn');
     const undoBtn = document.getElementById('undoBtn');
+    const skipBtn = document.getElementById('skipBtn');
     const stateSelectionPanel = document.getElementById('stateSelectionPanel');
     const closeSelectionPanelBtn = document.getElementById('closeSelectionPanelBtn');
     const startDrawingBtn = document.getElementById('startDrawingBtn');
@@ -400,7 +382,6 @@
     const confirmNo = document.getElementById('confirmNo');
     const riskDescriptionContainer = document.getElementById('riskDescriptionContainer');
     const riskDescriptionTextarea = document.getElementById('riskDescription');
-    const cleanSelectedMessage = document.getElementById('cleanSelectedMessage');
     const checkboxes = document.querySelectorAll('.state-options input[type="checkbox"]');
     
     let participantName = '';
@@ -410,13 +391,14 @@
     let selectedStates = [];
     let currentStateIndex = 0;
     let annotations = {};
-    let riskDescriptions = {}; // Riskの記述を保存
+    let riskDescriptions = {};
     let drawnRects = [];
     let isDrawing = false;
     let startX, startY;
     let isDrawingMode = false;
     let pendingRect = null;
-    let isCleanOnly = false; // Cleanのみが選択されたかどうかのフラグ
+    let currentStateRectCount = 0;
+    const MAX_RECTS_PER_STATE = 2;
 
     // --- 氏名入力チェック ---
     participantNameInput.addEventListener('input', () => {
@@ -424,69 +406,23 @@
         startExperimentBtn.disabled = !participantName;
     });
 
-    // --- Clean選択時の処理（他のカテゴリを無効化）---
-// 2. handleCleanSelection関数を修正（445-475行目あたり）
-    // --- Clean選択時の処理（他のカテゴリを無効化）---
-    function handleCleanSelection(isCleanChecked) {
-        if (isCleanChecked) {
-            // Cleanが選択された場合
-            isCleanOnly = true;
-            cleanSelectedMessage.style.display = 'block';
-            // 他のチェックボックスを無効化
-            checkboxes.forEach(cb => {
-                if (cb.value !== 'Clean') {
-                    cb.disabled = true;
-                    cb.checked = false;
-                }
-            });
-            // リスク記述欄を非表示
-            riskDescriptionContainer.classList.remove('visible');
-            riskDescriptionTextarea.value = '';
-            // 描画開始ボタンを有効化
-            startDrawingBtn.disabled = false;
-            // ボタンテキストを「次へ進む」に変更
-            startDrawingBtn.setAttribute('data-translate', 'next_button');
-            setLanguage(currentLang);
-        } else {
-            // Cleanが選択解除された場合
-            isCleanOnly = false;
-            cleanSelectedMessage.style.display = 'none';
-            // 他のチェックボックスを再有効化
-            checkboxes.forEach(cb => {
-                if (cb.value !== 'Clean') {
-                    cb.disabled = false;
-                }
-            });
-            // ボタン状態を更新
-            updateStartDrawingButtonState();
-            // ボタンテキストを「描画を開始」に戻す
-            startDrawingBtn.setAttribute('data-translate', 'start_drawing_button');
-            setLanguage(currentLang);
-        }
-    }
-
     // --- Risk選択時のリスク記述表示/非表示 ---
     checkboxes.forEach(checkbox => {
         checkbox.addEventListener('change', () => {
-            if (checkbox.value === 'Clean') {
-                handleCleanSelection(checkbox.checked);
-            } else if (!isCleanOnly) {
-                // Cleanが選択されていない場合のみ処理
-                updateStartDrawingButtonState();
-                // Riskが選択された場合、リスク記述欄を表示
-                if (checkbox.value === 'Risk' && checkbox.checked) {
-                    riskDescriptionContainer.classList.add('visible');
-                } else if (checkbox.value === 'Risk' && !checkbox.checked) {
-                    riskDescriptionContainer.classList.remove('visible');
-                    riskDescriptionTextarea.value = '';
-                }
+            updateStartDrawingButtonState();
+            // Riskが選択された場合、リスク記述欄を表示
+            if (checkbox.value === 'Risk' && checkbox.checked) {
+                riskDescriptionContainer.classList.add('visible');
+            } else if (checkbox.value === 'Risk' && !checkbox.checked) {
+                riskDescriptionContainer.classList.remove('visible');
+                riskDescriptionTextarea.value = '';
             }
         });
     });
 
     // --- ボタン状態管理のロジック ---
     function updateStartDrawingButtonState() {
-        const isAnyChecked = Array.from(checkboxes).some(cb => cb.checked && !cb.disabled);
+        const isAnyChecked = Array.from(checkboxes).some(cb => cb.checked);
         startDrawingBtn.disabled = !isAnyChecked;
     }
 
@@ -502,95 +438,60 @@
         startSession(true);
     });
 
+    // 4. mappingBtnクリック時のリセット処理を簡略化
     mappingBtn.addEventListener('click', () => {
-        console.log('mappingBtn clicked, isDrawingMode:', isDrawingMode);
-    
-        // 描画中の場合
-        if (isDrawingMode) {
-            console.log('Drawing mode detected, stopping drawing');
-            // 描画を中断して状態選択に戻る
-            canvas.style.display = 'none';
+            if (isDrawingMode) {
+                canvas.style.display = 'none';
+                stateSelectionPanel.classList.add('visible');
+                isDrawingMode = false;
+                
+                mappingBtn.setAttribute('data-translate', 'mapping_button');
+                setLanguage(currentLang);
+            
+                undoBtn.style.display = 'none';
+                skipBtn.style.display = 'none';
+                skipBtn.disabled = true;
+                instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
+                
+                drawnRects = [];
+                currentStateIndex = 0;
+                annotations = {};
+                riskDescriptions = {};
+                currentStateRectCount = 0;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                checkboxes.forEach(cb => {
+                    cb.checked = false;
+                });
+                startDrawingBtn.setAttribute('data-translate', 'start_drawing_button');
+                setLanguage(currentLang);
+                
+                return;
+            }
+
             stateSelectionPanel.classList.add('visible');
-            isDrawingMode = false;
-            
-            // ボタンテキストを「マッピング」に戻す
-            mappingBtn.setAttribute('data-translate', 'mapping_button');
-            setLanguage(currentLang);
-            
-            // 戻るボタンを非表示にする
-            undoBtn.style.display = 'none';
-            instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
-            
-            // 描画状態をリセット
-            drawnRects = [];
-            currentStateIndex = 0;
-            annotations = {};
-            riskDescriptions = {};
-            isCleanOnly = false;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Clean選択状態をリセット
-            cleanSelectedMessage.style.display = 'none';
-            checkboxes.forEach(cb => {
-                cb.checked = false;
-                cb.disabled = false;
-            });
-            // ボタンテキストを「描画を開始」に戻す
+            mappingBtn.disabled = true;
+            updateStartDrawingButtonState();
             startDrawingBtn.setAttribute('data-translate', 'start_drawing_button');
             setLanguage(currentLang);
-            
-            return;
-        }
-
-        console.log('Normal mapping process');
-
-        // 通常のマッピング処理
-        stateSelectionPanel.classList.add('visible');
-        mappingBtn.disabled = true;
-        updateStartDrawingButtonState();
-        // Cleanが選択されているかどうかでボタンテキストを設定
-        const cleanChecked = Array.from(checkboxes).find(cb => cb.value === 'Clean' && cb.checked);
-        if (cleanChecked && isCleanOnly) {
-            startDrawingBtn.setAttribute('data-translate', 'next_button');
-        } else {
-            startDrawingBtn.setAttribute('data-translate', 'start_drawing_button');
-        }
-        setLanguage(currentLang);
-        stateSelectionPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+            stateSelectionPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
 
     closeSelectionPanelBtn.addEventListener('click', () => {
         stateSelectionPanel.classList.remove('visible');
         mappingBtn.disabled = false;
         document.querySelectorAll('input[name="state"]:checked').forEach(cb => cb.checked = false);
-        checkboxes.forEach(cb => cb.disabled = false);
         riskDescriptionContainer.classList.remove('visible');
         riskDescriptionTextarea.value = '';
-        cleanSelectedMessage.style.display = 'none';
-        isCleanOnly = false;
-        // ボタンテキストを「描画を開始」に戻す
         startDrawingBtn.setAttribute('data-translate', 'start_drawing_button');
         setLanguage(currentLang);
         updateStartDrawingButtonState();
     });
 
+ // 6. startDrawingBtnクリック時の処理を簡略化
     startDrawingBtn.addEventListener('click', () => {
-        console.log('startDrawingBtn clicked');
-    
         if (startDrawingBtn.disabled) return;
         
-        // Cleanのみが選択されている場合
-        const cleanChecked = Array.from(checkboxes).find(cb => cb.value === 'Clean' && cb.checked);
-        if (cleanChecked && isCleanOnly) {
-            // Cleanのみが選択されている場合、他の状態は選択されていないので、すぐに次の画像に進む
-            selectedStates = ['Clean'];
-            annotations = {};
-            riskDescriptions = {};
-            finishMapping();
-            return;
-        }
-        
-        // Riskが選択されている場合、リスク記述が入力されているかチェック
         const riskChecked = Array.from(checkboxes).find(cb => cb.value === 'Risk' && cb.checked);
         if (riskChecked && !riskDescriptionTextarea.value.trim()) {
             alert(translations.alert_risk_description_required[currentLang]);
@@ -599,39 +500,28 @@
         
         stateSelectionPanel.classList.remove('visible');
         
-        // ボタンテキストを「状態の選択に戻る」に変更
         mappingBtn.setAttribute('data-translate', 'back_to_selection');
         setLanguage(currentLang);
         
-        selectedStates = Array.from(checkboxes).filter(cb => cb.checked && !cb.disabled).map(cb => cb.value);
+        selectedStates = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
         currentStateIndex = 0;
         drawnRects = [];
         annotations = {};
         riskDescriptions = {};
+        currentStateRectCount = 0;
         
-        // Riskが選択されている場合、リスク記述を保存
         if (riskChecked) {
             riskDescriptions['Risk'] = riskDescriptionTextarea.value.trim();
-        }
-        
-        // Cleanを除外して描画が必要な状態のみを処理（Riskは描画対象に含める）
-        selectedStates = selectedStates.filter(state => state !== 'Clean');
-        
-        // 描画が必要な状態がない場合（Cleanのみが選択された場合）
-        if (selectedStates.length === 0) {
-            finishMapping();
-            return;
         }
         
         canvas.style.display = 'block';
         undoBtn.style.display = 'block';
         undoBtn.disabled = false;
+        skipBtn.style.display = 'block';
+        skipBtn.disabled = true; // 最初は無効化、1つ描画後に有効化
         isDrawingMode = true;
         
-        // mappingBtn を有効にする
         mappingBtn.disabled = false;
-    
-        console.log('isDrawingMode set to:', isDrawingMode);
     
         startDrawingForCurrentState();
     });
@@ -643,24 +533,21 @@
             stateSelectionPanel.classList.remove('visible');
             checkboxes.forEach(cb => {
                 cb.checked = false;
-                cb.disabled = false;
             });
             riskDescriptionContainer.classList.remove('visible');
             riskDescriptionTextarea.value = '';
-            cleanSelectedMessage.style.display = 'none';
-            isCleanOnly = false;
+            skipBtn.style.display = 'none';
+            skipBtn.disabled = true;
             
             currentImageIndex++;
             loadImage();
         }, delay);
     }
 
-    // --- ページの初期化 ---
     document.addEventListener('DOMContentLoaded', () => {
         setLanguage('ja');
     });
 
-    // --- セッション開始 ---
     function startSession(isPracticeSession) {
         isPractice = isPracticeSession; 
         currentImageIndex = 0;
@@ -696,25 +583,22 @@
         };
         mappingBtn.disabled = false;
         undoBtn.style.display = 'none';
+        skipBtn.style.display = 'none';
+        skipBtn.disabled = true;
         
-        // 確認ダイアログが表示されている場合は閉じる
         confirmDialog.style.display = 'none';
         pendingRect = null;
         
-        // 状態をリセット
         annotations = {};
         riskDescriptions = {};
         drawnRects = [];
         currentStateIndex = 0;
-        isCleanOnly = false;
-        cleanSelectedMessage.style.display = 'none';
+        currentStateRectCount = 0;
         checkboxes.forEach(cb => {
             cb.checked = false;
-            cb.disabled = false;
         });
         riskDescriptionContainer.classList.remove('visible');
         riskDescriptionTextarea.value = '';
-        // ボタンテキストを「描画を開始」に戻す
         startDrawingBtn.setAttribute('data-translate', 'start_drawing_button');
         setLanguage(currentLang);
         
@@ -727,57 +611,136 @@
             return; 
         }
         const currentState = selectedStates[currentStateIndex];
-        instruction.textContent = translations.instruction_draw[currentLang](currentState);
+        currentStateRectCount = annotations[currentState] ? annotations[currentState].length : 0;
+        
+        if (currentStateRectCount >= MAX_RECTS_PER_STATE) {
+            currentStateIndex++;
+            startDrawingForCurrentState();
+            return;
+        }
+        
+        // 1つ描画済みの場合は特別なメッセージ、0個の場合は通常のメッセージ
+        if (currentStateRectCount === 1) {
+            instruction.textContent = translations.instruction_after_one[currentLang](currentState);
+        } else {
+            instruction.textContent = translations.instruction_draw[currentLang](
+                currentState, 
+                currentStateRectCount, 
+                MAX_RECTS_PER_STATE
+            );
+        }
+        
+        // スキップボタンの状態を更新（1つ以上描画されている場合は有効化）
+        skipBtn.disabled = (currentStateRectCount < 1);
+        
         canvas.addEventListener('mousedown', onMouseDown);
         canvas.addEventListener('mousemove', onMouseMove);
         canvas.addEventListener('mouseup', onMouseUp);
     }
 
     undoBtn.addEventListener('click', () => {
-        if (currentStateIndex === 0) return;
-        currentStateIndex--; 
-        const lastState = selectedStates[currentStateIndex];
-        delete annotations[lastState]; 
-        drawnRects.pop(); 
-        redrawCanvas();
-        instruction.textContent = translations.instruction_draw[currentLang](lastState);
+        const currentState = selectedStates[currentStateIndex];
+        if (currentState && annotations[currentState] && annotations[currentState].length > 0) {
+            annotations[currentState].pop();
+            drawnRects.pop();
+            redrawCanvas();
+            currentStateRectCount = annotations[currentState].length;
+            instruction.textContent = translations.instruction_draw[currentLang](
+                currentState, 
+                currentStateRectCount, 
+                MAX_RECTS_PER_STATE
+            );
+            // スキップボタンの状態を更新
+            skipBtn.disabled = (currentStateRectCount < 1);
+        } else if (currentStateIndex > 0) {
+            currentStateIndex--;
+            const lastState = selectedStates[currentStateIndex];
+            if (annotations[lastState] && annotations[lastState].length > 0) {
+                annotations[lastState].pop();
+                drawnRects.pop();
+                redrawCanvas();
+                currentStateRectCount = annotations[lastState].length;
+                instruction.textContent = translations.instruction_draw[currentLang](
+                    lastState, 
+                    currentStateRectCount, 
+                    MAX_RECTS_PER_STATE
+                );
+                // スキップボタンの状態を更新
+                skipBtn.disabled = (currentStateRectCount < 1);
+            }
+        }
     });
 
-    // 確認ダイアログのイベントハンドラー
-    confirmYes.addEventListener('click', () => {
-        if (pendingRect) {
-            // 四角形を確定（各状態につき1つのみ）
-            annotations[pendingRect.state] = pendingRect.rect;
-            drawnRects.push(pendingRect.rect);
+    skipBtn.addEventListener('click', () => {
+        // 現在のカテゴリで1つ以上描画されている場合のみスキップ可能
+        const currentState = selectedStates[currentStateIndex];
+        if (currentState && annotations[currentState] && annotations[currentState].length >= 1) {
+            // 次のカテゴリに進むか、全て完了なら画像を保存
             currentStateIndex++;
-            
-            // ダイアログを閉じる
-            confirmDialog.style.display = 'none';
-            pendingRect = null;
-            
-            // ボタンを再有効化
-            mappingBtn.disabled = false;
-            undoBtn.disabled = false;
-            
-            // 次の状態の描画を開始
             startDrawingForCurrentState();
         }
     });
 
+    confirmYes.addEventListener('click', () => {
+        if (pendingRect) {
+            const currentState = pendingRect.state;
+            
+            if (!annotations[currentState]) {
+                annotations[currentState] = [];
+            }
+            
+            annotations[currentState].push(pendingRect.rect);
+            drawnRects.push(pendingRect.rect);
+            currentStateRectCount = annotations[currentState].length;
+            
+            confirmDialog.style.display = 'none';
+            pendingRect = null;
+            
+            mappingBtn.disabled = false;
+            undoBtn.disabled = false;
+            
+            // 1つ以上描画されている場合はスキップボタンを有効化
+            skipBtn.disabled = (currentStateRectCount < 1);
+            
+            if (currentStateRectCount >= MAX_RECTS_PER_STATE) {
+                currentStateIndex++;
+                startDrawingForCurrentState();
+            } else if (currentStateRectCount === 1) {
+                // 1つ目を描画した後の説明文
+                instruction.textContent = translations.instruction_after_one[currentLang](currentState);
+            } else {
+                // 0個の場合（通常はここには来ない）
+                instruction.textContent = translations.instruction_draw[currentLang](
+                    currentState, 
+                    currentStateRectCount, 
+                    MAX_RECTS_PER_STATE
+                );
+            }
+        }
+    });
+
     confirmNo.addEventListener('click', () => {
-        // 四角形を破棄
         confirmDialog.style.display = 'none';
         pendingRect = null;
         
-        // ボタンを再有効化
         mappingBtn.disabled = false;
         undoBtn.disabled = false;
         
-        // キャンバスをクリアして既存の四角形のみ再描画
         redrawCanvas();
         
-        // 現在の状態の描画を再開（同じ状態をもう一度描画）
-        instruction.textContent = translations.instruction_draw[currentLang](selectedStates[currentStateIndex]);
+        const currentState = selectedStates[currentStateIndex];
+        currentStateRectCount = annotations[currentState] ? annotations[currentState].length : 0;
+        
+        // 1つ描画済みの場合は特別なメッセージ、それ以外は通常のメッセージ
+        if (currentStateRectCount === 1) {
+            instruction.textContent = translations.instruction_after_one[currentLang](currentState);
+        } else {
+            instruction.textContent = translations.instruction_draw[currentLang](
+                currentState, 
+                currentStateRectCount, 
+                MAX_RECTS_PER_STATE
+            );
+        }
     });
     
     function finishMapping() {
@@ -786,15 +749,12 @@
         canvas.removeEventListener('mousemove', onMouseMove);
         canvas.removeEventListener('mouseup', onMouseUp);
         
-        // ボタンテキストを「マッピング」に戻す
         mappingBtn.setAttribute('data-translate', 'mapping_button');
         setLanguage(currentLang);
         
-        // 戻るボタンを非表示にする
         undoBtn.style.display = 'none';
         isDrawingMode = false;
         
-        // 全てのボタンを無効化（次の画像遷移まで）
         mappingBtn.disabled = true;
         undoBtn.disabled = true;
         
@@ -882,18 +842,14 @@
             height: Math.abs(endY - startY) 
         };
         
-        // 四角形が小さすぎる場合は無視
         if (newRect.width < 5 || newRect.height < 5) {
             return;
         }
         
-        // 確認ダイアログを表示する前に、一時的に四角形を保存
         pendingRect = { rect: newRect, state: selectedStates[currentStateIndex] };
         
-        // 確認ダイアログを表示
         confirmDialog.style.display = 'flex';
         
-        // 確認ダイアログ表示中はボタンを無効化
         mappingBtn.disabled = true;
         undoBtn.disabled = true;
     }
@@ -906,8 +862,12 @@
         tempCtx.drawImage(mainImage, 0, 0);
         tempCtx.strokeStyle = 'lime'; 
         tempCtx.lineWidth = 5;
-        Object.values(annotations).forEach(rect => { 
-            tempCtx.strokeRect(rect.x, rect.y, rect.width, rect.height); 
+        Object.values(annotations).forEach(rectArray => {
+            if (Array.isArray(rectArray)) {
+                rectArray.forEach(rect => {
+                    tempCtx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+                });
+            }
         });
         return tempCanvas.toDataURL('image/png');
     }
