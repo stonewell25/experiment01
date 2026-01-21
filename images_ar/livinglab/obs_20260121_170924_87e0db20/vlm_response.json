@@ -1,0 +1,50 @@
+{
+  "raw_text": "```json\n{\n  \"detected_regions\": [\n    {\n      \"bbox_2d\": [\n        383,\n        485,\n        508,\n        588\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.85,\n        \"reason\": \"Cables and a power strip are piled up on the floor near the TV stand.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        438,\n        727,\n        507,\n        867\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.75,\n        \"reason\": \"Cables are piled up on the floor behind the TV stand.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        110,\n        389,\n        699,\n        877\n      ],\n      \"analysis\": {\n        \"category\": \"about to fall\",\n        \"score\": 0.6,\n        \"reason\": \"The person standing high on the A-frame ladder appears unstable and is at risk of falling, especially given the height and lack of visible support/harness.\"\n      }\n    }\n  ]\n}\n```",
+  "parsed": {
+    "detected_regions": [
+      {
+        "bbox_2d": [
+          383,
+          485,
+          508,
+          588
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.85,
+          "reason": "Cables and a power strip are piled up on the floor near the TV stand."
+        }
+      },
+      {
+        "bbox_2d": [
+          438,
+          727,
+          507,
+          867
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.75,
+          "reason": "Cables are piled up on the floor behind the TV stand."
+        }
+      },
+      {
+        "bbox_2d": [
+          110,
+          389,
+          699,
+          877
+        ],
+        "analysis": {
+          "category": "about to fall",
+          "score": 0.6,
+          "reason": "The person standing high on the A-frame ladder appears unstable and is at risk of falling, especially given the height and lack of visible support/harness."
+        }
+      }
+    ]
+  },
+  "model": "gemini-2.5-flash-preview-09-2025",
+  "topic_id": "cluster_0",
+  "timestamp": "2026-01-21T17:09:33",
+  "timestamp_ros": "1768982973.4430456"
+}

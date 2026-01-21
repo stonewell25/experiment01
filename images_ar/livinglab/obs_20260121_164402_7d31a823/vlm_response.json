@@ -1,0 +1,50 @@
+{
+  "raw_text": "```json\n{\n  \"detected_regions\": [\n    {\n      \"bbox_2d\": [\n        458,\n        342,\n        994,\n        684\n      ],\n      \"analysis\": {\n        \"category\": \"about to fall\",\n        \"score\": 0.5,\n        \"reason\": \"The shirt and iron are placed on a small stool, and the shirt is draped over the sides, making the iron and shirt appear somewhat unstable and likely to fall off if disturbed.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        256,\n        550,\n        500,\n        638\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.6,\n        \"reason\": \"There are various cables and small objects visible beneath the large screen/TV on a small shelf, indicating a cluttered area.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        388,\n        715,\n        536,\n        838\n      ],\n      \"analysis\": {\n        \"category\": \"stacked\",\n        \"score\": 0.9,\n        \"reason\": \"Two pillows are clearly stacked on top of each other on the sofa.\"\n      }\n    }\n  ]\n}\n```",
+  "parsed": {
+    "detected_regions": [
+      {
+        "bbox_2d": [
+          458,
+          342,
+          994,
+          684
+        ],
+        "analysis": {
+          "category": "about to fall",
+          "score": 0.5,
+          "reason": "The shirt and iron are placed on a small stool, and the shirt is draped over the sides, making the iron and shirt appear somewhat unstable and likely to fall off if disturbed."
+        }
+      },
+      {
+        "bbox_2d": [
+          256,
+          550,
+          500,
+          638
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.6,
+          "reason": "There are various cables and small objects visible beneath the large screen/TV on a small shelf, indicating a cluttered area."
+        }
+      },
+      {
+        "bbox_2d": [
+          388,
+          715,
+          536,
+          838
+        ],
+        "analysis": {
+          "category": "stacked",
+          "score": 0.9,
+          "reason": "Two pillows are clearly stacked on top of each other on the sofa."
+        }
+      }
+    ]
+  },
+  "model": "gemini-2.5-flash-preview-09-2025",
+  "topic_id": "cluster_0",
+  "timestamp": "2026-01-21T16:46:11",
+  "timestamp_ros": "1768981571.502409"
+}

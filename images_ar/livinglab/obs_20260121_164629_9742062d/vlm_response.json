@@ -1,0 +1,37 @@
+{
+  "raw_text": "```json\n{\n  \"detected_regions\": [\n    {\n      \"bbox_2d\": [\n        292,\n        297,\n        617,\n        500\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.85,\n        \"reason\": \"Cables and electronic devices are piled up on the floor and on the shelf under the TV, creating a cluttered area.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        408,\n        494,\n        565,\n        666\n      ],\n      \"analysis\": {\n        \"category\": \"stacked\",\n        \"score\": 0.9,\n        \"reason\": \"Two pillows are stacked on top of each other on the sofa.\"\n      }\n    }\n  ]\n}\n```",
+  "parsed": {
+    "detected_regions": [
+      {
+        "bbox_2d": [
+          292,
+          297,
+          617,
+          500
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.85,
+          "reason": "Cables and electronic devices are piled up on the floor and on the shelf under the TV, creating a cluttered area."
+        }
+      },
+      {
+        "bbox_2d": [
+          408,
+          494,
+          565,
+          666
+        ],
+        "analysis": {
+          "category": "stacked",
+          "score": 0.9,
+          "reason": "Two pillows are stacked on top of each other on the sofa."
+        }
+      }
+    ]
+  },
+  "model": "gemini-2.5-flash-preview-09-2025",
+  "topic_id": "cluster_0",
+  "timestamp": "2026-01-21T16:46:38",
+  "timestamp_ros": "1768981598.2317088"
+}

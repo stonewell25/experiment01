@@ -1,0 +1,50 @@
+{
+  "raw_text": "```json\n{\n  \"detected_regions\": [\n    {\n      \"bbox_2d\": [\n        684,\n        725,\n        756,\n        870\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.85,\n        \"reason\": \"Cables and a power strip are piled up on the floor near the TV stand, indicating a cluttered area.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        297,\n        838,\n        372,\n        965\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.7,\n        \"reason\": \"A small plant is placed on a shelf below the TV, and cables are visible, contributing to a cluttered appearance around the stand.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        625,\n        493,\n        886,\n        700\n      ],\n      \"analysis\": {\n        \"category\": \"about to fall\",\n        \"score\": 0.55,\n        \"reason\": \"The iron is placed on a small stool covered by a shirt, and the shirt is draped over the sides, making the iron appear less stable and potentially likely to fall if disturbed.\"\n      }\n    }\n  ]\n}\n```",
+  "parsed": {
+    "detected_regions": [
+      {
+        "bbox_2d": [
+          684,
+          725,
+          756,
+          870
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.85,
+          "reason": "Cables and a power strip are piled up on the floor near the TV stand, indicating a cluttered area."
+        }
+      },
+      {
+        "bbox_2d": [
+          297,
+          838,
+          372,
+          965
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.7,
+          "reason": "A small plant is placed on a shelf below the TV, and cables are visible, contributing to a cluttered appearance around the stand."
+        }
+      },
+      {
+        "bbox_2d": [
+          625,
+          493,
+          886,
+          700
+        ],
+        "analysis": {
+          "category": "about to fall",
+          "score": 0.55,
+          "reason": "The iron is placed on a small stool covered by a shirt, and the shirt is draped over the sides, making the iron appear less stable and potentially likely to fall if disturbed."
+        }
+      }
+    ]
+  },
+  "model": "gemini-2.5-flash-preview-09-2025",
+  "topic_id": "cluster_0",
+  "timestamp": "2026-01-21T16:43:41",
+  "timestamp_ros": "1768981421.5729249"
+}
