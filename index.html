@@ -669,7 +669,6 @@
     <div id="end-screen">
         <h1 data-translate="end_title"></h1>
         <p data-translate="end_message"></p>
-        <button id="downloadBtn" class="btn" data-translate="download_button"></button>
     </div>
 
     <script>
@@ -709,7 +708,7 @@
 
         // ★★★ Google Apps Script URL ★★★
         // デプロイ後のウェブアプリURLをここに貼り付けてください
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycbwlLqI4LcFQ1eI0_aoMRHk1qrjsE4LdbsdUzXw0CZ6WF8yoZCDn8koCbgX-5jgzjYvc/exec';
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbwDqlgPlPPbJWDRWLXhzh-QrGc5Gdj6zYKNotfdaR9eoKDdrFGH8Rr3G5ssGP_tcS3Z/exec';
 
         // 6つのリスクカテゴリ
         const riskCategories = [
@@ -727,14 +726,18 @@
             welcome_intro: { ja: "この実験にご協力いただき、ありがとうございます。以下の説明をよくお読みの上、ご参加ください。", en: "Thank you for participating in this experiment. Please read the instructions below carefully before you begin." },
             overview_title: { ja: "実験の概要", en: "Experiment Overview" },
             overview_list: {
-                ja: `<li>最初に練習セッション（3枚）があり、その後に本番セッション（13枚）があります。</li>
-                     <li>各画像について、6つのリスクカテゴリについてリスクが「ある」か確認してください。</li>
-                     <li>リスクが「ある」と判断した場合、そのリスク箇所を自由な形で囲んでいただきます。</li>
-                     <li>リスクがない場合は「リスクはない」を選択してください。</li>`,
-                en: `<li>There will be a practice session (3 images) followed by the main session (13 images).</li>
-                     <li>For each image, check if there is a risk for any of the 6 categories.</li>
-                     <li>If you identify a risk, you will draw a freeform shape around the risky area.</li>
-                     <li>If there is no risk, select "No risk".</li>`
+                ja: `<li>所要時間は約10分です。</li>
+                     <li>最初に練習セッション（3枚）があり、その後に本番セッション（13枚）があります。</li>
+                     <li>各画像について、以下の6つの事故リスクが存在するかどうかのチェックをお願いします。</li>
+                     <li>ご自身の感覚で構いませんので、直感的に回答をいただければと思います。</li>
+                     <li>リスクが「ある」と判断した場合、そのリスク箇所を自由な形で囲んでいただきます。スマホの場合、指で描画できます。PCの場合はマウスを使って円を描いてください。</li>
+                     <li>リスクがない場合は「リスクはない」を選択していただいて構いません。</li>`,
+                en: `<li>This experiment takes approximately 10 minutes.</li>
+                     <li>There will be a practice session (3 images) followed by the main session (13 images).</li>
+                     <li>For each image, please check whether any of the following 6 accident risks exist.</li>
+                     <li>Please answer intuitively based on your own perception.</li>
+                     <li>If you identify a risk, please draw a freeform shape around the risky area. On smartphones, you can draw with your finger. On PC, please use the mouse to draw.</li>
+                     <li>If there is no risk, you may select "No risk".</li>`
             },
             risk_explanation_title: { ja: "リスクカテゴリの説明", en: "Risk Category Explanations" },
 
@@ -780,9 +783,8 @@
             modal_title: { ja: "リスクを選択してください (複数選択可)", en: "Select risks (multiple selections allowed)" },
             no_risk_option: { ja: "リスクはない", en: "No risk" },
             start_drawing_button: { ja: "描画を開始", en: "Start Drawing" },
-            download_button: { ja: "CSVをダウンロード", en: "Download CSV" },
             end_title: { ja: "実験完了", en: "Experiment Complete" },
-            end_message: { ja: "ご協力ありがとうございました。下のボタンから結果をダウンロードしてください。", en: "Thank you for your participation. Please download the results using the button below." },
+            end_message: { ja: "ご協力ありがとうございました。", en: "Thank you for your participation." },
             session_practice: { ja: "練習セッション", en: "Practice Session" },
             session_main: { ja: "本番セッション", en: "Main Session" },
             progress: { ja: (c, t) => `画像 ${c} / ${t}`, en: (c, t) => `Image ${c} / ${t}` },
@@ -887,7 +889,6 @@
         const closeSelectionPanelBtn = document.getElementById('closeSelectionPanelBtn');
         const noRiskCheckbox = document.getElementById('noRiskCheckbox');
         const instruction = document.getElementById('instruction');
-        const downloadBtn = document.getElementById('downloadBtn');
         const participantNameInput = document.getElementById('participantName');
         const confirmDialog = document.getElementById('confirmDialog');
         const confirmYes = document.getElementById('confirmYes');
@@ -1520,45 +1521,6 @@
             endScreen.style.display = 'flex';
         }
 
-        downloadBtn.addEventListener('click', () => {
-            downloadCSV();
-        });
-
-        function downloadCSV() {
-            // CSV Header
-            let csv = 'participant_name,image_path,no_risk,fire_selected,burn_selected,ingestion_selected,fall_selected,damage_selected,cut_selected,fire_path,burn_path,ingestion_path,fall_path,damage_path,cut_path\n';
-
-            allResults.forEach(result => {
-                const row = [
-                    result.participantName,
-                    result.imagePath,
-                    result.noRisk ? 1 : 0,
-                    result.risks.fire.selected ? 1 : 0,
-                    result.risks.burn.selected ? 1 : 0,
-                    result.risks.ingestion.selected ? 1 : 0,
-                    result.risks.fall.selected ? 1 : 0,
-                    result.risks.damage.selected ? 1 : 0,
-                    result.risks.cut.selected ? 1 : 0,
-                    JSON.stringify(result.risks.fire.path),
-                    JSON.stringify(result.risks.burn.path),
-                    JSON.stringify(result.risks.ingestion.path),
-                    JSON.stringify(result.risks.fall.path),
-                    JSON.stringify(result.risks.damage.path),
-                    JSON.stringify(result.risks.cut.path)
-                ];
-                csv += row.map(v => `"${v}"`).join(',') + '\n';
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `risk_assessment_${participantName}_${new Date().toISOString().slice(0, 10)}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
 
         // --- 初期化 ---
         document.addEventListener('DOMContentLoaded', () => {

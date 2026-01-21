@@ -13,6 +13,11 @@
  * 6. 生成されたウェブアプリURLを index.html の GAS_URL にペースト
  */
 
+// ★★★ 設定 ★★★
+// 画像を保存する親フォルダ名（Google Driveのルートに作成されます）
+// このフォルダの中に参加者ごとのサブフォルダが自動作成されます
+const ROOT_FOLDER_NAME = 'Advanced_robotics_2026/RiskAssessmentImages';
+
 function doPost(e) {
   try {
     // JSONデータをパース
@@ -104,6 +109,17 @@ function doPost(e) {
 
 /**
  * 画像をGoogle Driveに保存
+ * 親フォルダ（ROOT_FOLDER_NAME）の中に参加者ごとのサブフォルダを作成し、
+ * そこに画像を保存します。
+ * 
+ * フォルダ構造:
+ * ROOT_FOLDER_NAME/
+ * ├── 参加者A/
+ * │   ├── 画像1.png
+ * │   └── 画像2.png
+ * └── 参加者B/
+ *     ├── 画像1.png
+ *     └── 画像2.png
  */
 function saveImageToDrive(dataUrl, participantName, imagePath) {
   // DataURLからBlobを作成
@@ -114,27 +130,91 @@ function saveImageToDrive(dataUrl, participantName, imagePath) {
   // ファイル名を生成
   const imageFileName = imagePath.split('/').pop().replace(/\.\w+$/, '');
   const timestamp = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyyMMdd_HHmmss');
-  const fileName = `${participantName}_${imageFileName}_${timestamp}.png`;
+  const fileName = `${imageFileName}_${timestamp}.png`;
   
-  // フォルダを取得または作成
-  let folder;
-  const folderName = 'RiskAssessmentImages';
-  const folders = DriveApp.getFoldersByName(folderName);
+  // 親フォルダを取得または作成（パス形式をサポート）
+  // 例: 'Advanced_robotics_2026/RiskAssessmentImages' のようなネストされたパスもOK
+  let rootFolder = getOrCreateFolderPath(ROOT_FOLDER_NAME);
   
-  if (folders.hasNext()) {
-    folder = folders.next();
-  } else {
-    folder = DriveApp.createFolder(folderName);
-  }
+  // 参加者名のサブフォルダを取得または作成
+  // 参加者名が空の場合は 'anonymous' を使用
+  const safeName = participantName ? sanitizeFolderName(participantName) : 'anonymous';
+  let userFolder = getOrCreateFolder(rootFolder, safeName);
   
   // ファイルを保存
   blob.setName(fileName);
-  const file = folder.createFile(blob);
+  const file = userFolder.createFile(blob);
   
   // 共有設定（リンクを知っている全員が閲覧可能）
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
   
   return file.getUrl();
+}
+
+/**
+ * フォルダ名として使用できない文字を置換
+ */
+function sanitizeFolderName(name) {
+  // Google Drive で使えない文字を置換（スラッシュは除外 - パス区切りとして使用）
+  return name.replace(/[\\:*?"<>|]/g, '_').trim();
+}
+
+/**
+ * パス形式のフォルダを取得または作成
+ * 例: 'ParentFolder/ChildFolder/GrandChild' のようなパスを処理
+ * @param {string} folderPath - スラッシュ区切りのフォルダパス
+ * @returns {Folder} 最終的なフォルダオブジェクト
+ */
+function getOrCreateFolderPath(folderPath) {
+  // パスをスラッシュで分割
+  const pathParts = folderPath.split('/').filter(part => part.trim() !== '');
+  
+  if (pathParts.length === 0) {
+    throw new Error('Invalid folder path');
+  }
+  
+  // 最初のフォルダはルートから検索
+  let currentFolder = getOrCreateFolder(null, pathParts[0]);
+  
+  // 残りのフォルダを順番に作成/取得
+  for (let i = 1; i < pathParts.length; i++) {
+    currentFolder = getOrCreateFolder(currentFolder, pathParts[i]);
+  }
+  
+  return currentFolder;
+}
+
+/**
+ * 指定されたフォルダ内にサブフォルダを取得または作成
+ * @param {Folder|null} parentFolder - 親フォルダ（nullの場合はルート）
+ * @param {string} folderName - 作成/取得するフォルダ名（スラッシュなし）
+ * @returns {Folder} フォルダオブジェクト
+ */
+function getOrCreateFolder(parentFolder, folderName) {
+  // フォルダ名をサニタイズ（スラッシュ以外の不正文字を除去）
+  const safeFolderName = folderName.replace(/[\\:*?"<>|]/g, '_').trim();
+  
+  let folder;
+  
+  if (parentFolder === null) {
+    // ルートレベルでフォルダを検索
+    const folders = DriveApp.getFoldersByName(safeFolderName);
+    if (folders.hasNext()) {
+      folder = folders.next();
+    } else {
+      folder = DriveApp.createFolder(safeFolderName);
+    }
+  } else {
+    // 親フォルダ内でサブフォルダを検索
+    const subFolders = parentFolder.getFoldersByName(safeFolderName);
+    if (subFolders.hasNext()) {
+      folder = subFolders.next();
+    } else {
+      folder = parentFolder.createFolder(safeFolderName);
+    }
+  }
+  
+  return folder;
 }
 
 /**
