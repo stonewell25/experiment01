@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>リスク評価実験 / Risk Assessment Experiment</title>
+    <style>
+        /* CSS Variables for theming */
+        :root {
+            --primary-color: #4a6cf7;
+            --primary-hover: #3b5de7;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+        }
+
+        .lang-switcher {
+            position: fixed;
+            top: 20px;
+            right: 25px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 16px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .lang-switcher button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95em;
+            color: var(--primary-color);
+            padding: 5px 10px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .lang-switcher button:hover {
+            color: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        .lang-switcher button.active {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 15px;
+        }
+
+        #start-screen {
+            max-width: 800px;
+            padding: 50px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            text-align: left;
+            backdrop-filter: blur(20px);
+        }
+
+        #start-screen h1 {
+            text-align: center;
+            font-size: 2em;
+            background: var(--bg-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 25px;
+        }
+
+        #start-screen p {
+            line-height: 1.8;
+            color: #555;
+        }
+
+        #start-screen h3 {
+            margin-top: 25px;
+            margin-bottom: 12px;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        #start-screen ul,
+        #start-screen ol {
+            padding-left: 25px;
+            line-height: 1.9;
+            color: #555;
+        }
+
+        #start-experiment-btn {
+            display: block;
+            width: 70%;
+            margin: 40px auto 0;
+            padding: 18px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--bg-gradient);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            box-shadow: 0 8px 25px rgba(74, 108, 247, 0.4);
+            transition: var(--transition);
+        }
+
+        #start-experiment-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(74, 108, 247, 0.5);
+        }
+
+        #experiment-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        #session-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        #progress-info {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .image-container {
+            position: relative;
+            width: 640px;
+            height: 480px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            background-color: #f8f9fa;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #mainImage {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            display: none;
+        }
+
+        /* Risk Assessment Panel */
+        #riskAssessmentPanel {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 25px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: var(--border-radius);
+            border: 1px solid #dee2e6;
+        }
+
+        .risk-question {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+
+        .risk-question:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .risk-question.requires-drawing {
+            border-left: 4px solid var(--danger-color);
+            background: #fff5f5;
+        }
+
+        .risk-question.drawing-complete {
+            border-left: 4px solid var(--success-color);
+            background: #f0fff4;
+        }
+
+        .risk-question h4 {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .rating-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .rating-btn {
+            padding: 12px 18px;
+            font-size: 0.95em;
+            border: 2px solid #dee2e6;
+            border-radius: 25px;
+            background: white;
+            cursor: pointer;
+            transition: var(--transition);
+            min-width: 100px;
+            font-weight: 500;
+        }
+
+        .rating-btn:hover {
+            border-color: var(--primary-color);
+            background: #f0f4ff;
+        }
+
+        .rating-btn.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+
+        .rating-btn.high-risk {
+            background: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .draw-prompt {
+            display: none;
+            margin-top: 15px;
+            padding: 12px 20px;
+            background: #fff3cd;
+            border-radius: 8px;
+            color: #856404;
+            font-weight: 500;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .draw-prompt.visible {
+            display: block;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            font-size: 1.1em;
+            padding: 14px 30px;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+            color: #666;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #nextBtn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        #undoBtn {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: #333;
+        }
+
+        #downloadBtn {
+            background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+        }
+
+        #instruction {
+            margin-top: 15px;
+            font-weight: 600;
+            color: var(--danger-color);
+            height: 24px;
+            font-size: 1.05em;
+        }
+
+        /* End Screen */
+        #end-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 60px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+
+        #end-screen h1 {
+            background: var(--bg-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        #end-screen p {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .image-container {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 4/3;
+            }
+
+            .rating-options {
+                flex-direction: column;
+            }
+
+            .rating-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="lang-switcher">
+        <button id="lang-ja" class="active">日本語</button> / <button id="lang-en">English</button>
+    </div>
+
+    <div id="start-screen">
+        <h1 data-translate="welcome_title"></h1>
+        <p data-translate="welcome_intro"></p>
+        <h3 data-translate="overview_title"></h3>
+        <ul data-translate="overview_list"></ul>
+        <h3 data-translate="how_to_title"></h3>
+        <ol data-translate="how_to_list"></ol>
+        <button id="start-experiment-btn" data-translate="start_button"></button>
+    </div>
+
+    <div id="experiment-screen">
+        <h2 id="session-title"></h2>
+        <p id="progress-info"></p>
+        <div class="image-container">
+            <img id="mainImage" src="" alt="Experiment Image">
+            <canvas id="drawingCanvas"></canvas>
+        </div>
+
+        <div id="riskAssessmentPanel">
+            <!-- Risk questions will be dynamically generated -->
+        </div>
+
+        <div class="controls">
+            <button id="undoBtn" class="btn" data-translate="undo_button" style="display: none;"></button>
+            <button id="nextBtn" class="btn" data-translate="next_button" disabled></button>
+        </div>
+        <div id="instruction"></div>
+    </div>
+
+    <div id="end-screen">
+        <h1 data-translate="end_title"></h1>
+        <p data-translate="end_message"></p>
+        <button id="downloadBtn" class="btn" data-translate="download_button"></button>
+    </div>
+
+    <script>
+        // --- 画像設定 ---
+        // Kitchen の画像（各サブディレクトリ内のrgb.jpg）
+        const kitchenImages = [
+            'images_ar/kitchen/mozaiku_obs_20251227_041959_cc1d2e36/rgb.jpg',
+            'images_ar/kitchen/mozaiku_obs_20251227_042101_ff99bb47/rgb.jpg',
+            'images_ar/kitchen/obs_20251227_042419_719a8cf2/rgb.jpg',
+            'images_ar/kitchen/obs_20251227_042955_c6210061/rgb.jpg',
+            'images_ar/kitchen/obs_20251227_043054_8ce47229/rgb.jpg',
+            'images_ar/kitchen/obs_20251227_043202_a371e222/rgb.jpg'
+        ];
+
+        // Livinglab の画像（各サブディレクトリ内のrgb.jpg）
+        const livinglabImages = [
+            'images_ar/livinglab/obs_20251227_005248_bebad969/rgb.jpg',
+            'images_ar/livinglab/obs_20251227_010207_e5edc8f5/rgb.jpg',
+            'images_ar/livinglab/obs_20251227_010225_4f95f5a5/rgb.jpg',
+            'images_ar/livinglab/obs_20251227_010434_c104a944/rgb.jpg',
+            'images_ar/livinglab/モザイク入れるobs_20251227_010620_bf674b97/rgb.jpg',
+            'images_ar/livinglab/obs_20251227_010932_db273de0/rgb.jpg'
+        ];
+
+        // NYUデータセットからランダムに10枚を選択する関数
+        function generateNyuImages() {
+            const totalNyuImages = 1449;
+            const selectedIndices = [];
+            while (selectedIndices.length < 10) {
+                const randomIndex = Math.floor(Math.random() * totalNyuImages);
+                if (!selectedIndices.includes(randomIndex)) {
+                    selectedIndices.push(randomIndex);
+                }
+            }
+            return selectedIndices.map(idx => {
+                const paddedIdx = String(idx).padStart(5, '0');
+                return `images_ar/nyu_exported_images/rgb/nyu_${paddedIdx}.png`;
+            });
+        }
+
+        // 6つのリスクカテゴリ
+        const riskCategories = [
+            { id: 'fire', key: 'risk_fire' },
+            { id: 'burn', key: 'risk_burn' },
+            { id: 'ingestion', key: 'risk_ingestion' },
+            { id: 'fall', key: 'risk_fall' },
+            { id: 'damage', key: 'risk_damage' },
+            { id: 'cut', key: 'risk_cut' }
+        ];
+
+        // 5段階の同意度
+        const ratingLevels = [
+            { value: 1, key: 'rating_1' },
+            { value: 2, key: 'rating_2' },
+            { value: 3, key: 'rating_3' },
+            { value: 4, key: 'rating_4' },
+            { value: 5, key: 'rating_5' }
+        ];
+
+        // --- テキスト管理 ---
+        const translations = {
+            welcome_title: { ja: "リスク評価実験へようこそ", en: "Welcome to the Risk Assessment Experiment" },
+            welcome_intro: { ja: "この実験にご協力いただき、ありがとうございます。以下の説明をよくお読みの上、ご参加ください。", en: "Thank you for participating in this experiment. Please read the instructions below carefully before you begin." },
+            overview_title: { ja: "実験の概要", en: "Experiment Overview" },
+            overview_list: {
+                ja: `<li>複数の画像を見て、各画像に対する6つのリスクカテゴリについて同意度を評価していただきます。</li>
+                     <li>対象となるリスクカテゴリは <strong>{火事, 火傷, 誤飲, 転倒, 物体破損, 切傷}</strong> の6つです。</li>
+                     <li>各カテゴリについて、5段階の同意度（まったくない〜ある）で評価してください。</li>
+                     <li>「ほとんどある」または「ある」と回答した場合、リスクだと思う場所を円で囲んでいただきます。</li>`,
+                en: `<li>You will view multiple images and rate your agreement with 6 risk categories for each image.</li>
+                     <li>The risk categories are: <strong>{Fire, Burn, Ingestion, Fall, Object Damage, Cut}</strong>.</li>
+                     <li>For each category, please rate your agreement on a 5-point scale (Not at all - Definitely).</li>
+                     <li>If you answer "Mostly" or "Definitely", you will be asked to circle the area you think is risky.</li>`
+            },
+            how_to_title: { ja: "操作方法", en: "How to Operate" },
+            how_to_list: {
+                ja: `<li>各画像について、6つのリスクカテゴリそれぞれの同意度を選択してください。</li>
+                     <li>「ほとんどある」(4) または「ある」(5) を選択した場合、画像上でリスク箇所を円で囲んでください。</li>
+                     <li>すべての評価が完了したら「次へ」ボタンを押して次の画像に進みます。</li>
+                     <li>最後に、結果をCSVファイルとしてダウンロードできます。</li>`,
+                en: `<li>For each image, select your agreement level for all 6 risk categories.</li>
+                     <li>If you select "Mostly" (4) or "Definitely" (5), please circle the risky area on the image.</li>
+                     <li>After completing all evaluations, click "Next" to proceed to the next image.</li>
+                     <li>At the end, you can download the results as a CSV file.</li>`
+            },
+            start_button: { ja: "実験を開始する", en: "Start Experiment" },
+            next_button: { ja: "次へ", en: "Next" },
+            undo_button: { ja: "円を消す", en: "Undo Circle" },
+            download_button: { ja: "CSVをダウンロード", en: "Download CSV" },
+            end_title: { ja: "実験完了", en: "Experiment Complete" },
+            end_message: { ja: "ご協力ありがとうございました。下のボタンから結果をダウンロードしてください。", en: "Thank you for your participation. Please download the results using the button below." },
+
+            risk_fire: { ja: "画像内には火事リスクがある", en: "There is a fire risk in the image" },
+            risk_burn: { ja: "画像内には火傷のリスクがある", en: "There is a burn risk in the image" },
+            risk_ingestion: { ja: "画像内には誤飲のリスクがある", en: "There is an ingestion risk in the image" },
+            risk_fall: { ja: "画像内には転倒のリスクがある", en: "There is a fall risk in the image" },
+            risk_damage: { ja: "画像内には物体が破損（落ちて壊れるなど）リスクがある", en: "There is an object damage risk in the image" },
+            risk_cut: { ja: "画像内には切傷のリスクがある", en: "There is a cut injury risk in the image" },
+
+            rating_1: { ja: "まったくない", en: "Not at all" },
+            rating_2: { ja: "ほとんどない", en: "Hardly" },
+            rating_3: { ja: "まあまあ", en: "Somewhat" },
+            rating_4: { ja: "ほとんどある", en: "Mostly" },
+            rating_5: { ja: "ある", en: "Definitely" },
+
+            draw_prompt: { ja: "↑ リスク箇所を画像上で円で囲んでください", en: "↑ Please circle the risky area on the image" },
+            instruction_draw: { ja: (risk) => `【${risk}】のリスク箇所を円で囲んでください`, en: (risk) => `Please circle the area for [${risk}] risk` },
+            session_title: { ja: "リスク評価", en: "Risk Assessment" },
+            progress: { ja: (c, t) => `画像 ${c} / ${t}`, en: (c, t) => `Image ${c} / ${t}` }
+        };
+
+        let currentLang = 'ja';
+
+        // --- 言語切替機能 ---
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.dataset.translate;
+                if (translations[key] && translations[key][lang]) {
+                    el.innerHTML = translations[key][lang];
+                }
+            });
+            document.getElementById('lang-ja').classList.toggle('active', lang === 'ja');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+
+            // Update dynamic content
+            updateRiskPanelLanguage();
+            updateProgressInfo();
+        }
+
+        function updateRiskPanelLanguage() {
+            riskCategories.forEach(cat => {
+                const questionEl = document.querySelector(`[data-risk-id="${cat.id}"] h4`);
+                if (questionEl) {
+                    questionEl.textContent = translations[cat.key][currentLang];
+                }
+            });
+            ratingLevels.forEach(level => {
+                document.querySelectorAll(`.rating-btn[data-value="${level.value}"]`).forEach(btn => {
+                    btn.textContent = translations[level.key][currentLang];
+                });
+            });
+            document.querySelectorAll('.draw-prompt').forEach(el => {
+                el.textContent = translations.draw_prompt[currentLang];
+            });
+        }
+
+        document.getElementById('lang-ja').addEventListener('click', () => setLanguage('ja'));
+        document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+
+        // --- 要素取得と変数定義 ---
+        const startScreen = document.getElementById('start-screen');
+        const experimentScreen = document.getElementById('experiment-screen');
+        const endScreen = document.getElementById('end-screen');
+        const startExperimentBtn = document.getElementById('start-experiment-btn');
+        const sessionTitle = document.getElementById('session-title');
+        const progressInfo = document.getElementById('progress-info');
+        const mainImage = document.getElementById('mainImage');
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        const riskAssessmentPanel = document.getElementById('riskAssessmentPanel');
+        const nextBtn = document.getElementById('nextBtn');
+        const undoBtn = document.getElementById('undoBtn');
+        const instruction = document.getElementById('instruction');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        let allImages = [];
+        let currentImageIndex = 0;
+        let currentRatings = {};
+        let currentCircles = {};
+        let allResults = [];
+        let isDrawing = false;
+        let drawingForRisk = null;
+        let circleStart = null;
+
+        // --- 実験フロー ---
+        startExperimentBtn.addEventListener('click', () => {
+            // 画像リストを構築（kitchen + livinglab + NYU 10枚)
+            const nyuImages = generateNyuImages();
+            allImages = [...kitchenImages, ...livinglabImages, ...nyuImages];
+            // シャッフル（オプション）
+            // allImages = shuffleArray(allImages);
+
+            startScreen.style.display = 'none';
+            experimentScreen.style.display = 'flex';
+            loadImage();
+        });
+
+        function updateProgressInfo() {
+            if (progressInfo && allImages.length > 0) {
+                progressInfo.textContent = translations.progress[currentLang](currentImageIndex + 1, allImages.length);
+            }
+        }
+
+        function loadImage() {
+            if (currentImageIndex >= allImages.length) {
+                showEndScreen();
+                return;
+            }
+
+            currentRatings = {};
+            currentCircles = {};
+            riskCategories.forEach(cat => {
+                currentRatings[cat.id] = null;
+                currentCircles[cat.id] = [];
+            });
+
+            const imagePath = allImages[currentImageIndex];
+            mainImage.crossOrigin = "Anonymous";
+            mainImage.src = imagePath;
+            mainImage.onload = () => {
+                const container = document.querySelector('.image-container');
+                canvas.width = mainImage.naturalWidth;
+                canvas.height = mainImage.naturalHeight;
+            };
+
+            sessionTitle.textContent = translations.session_title[currentLang];
+            updateProgressInfo();
+
+            buildRiskPanel();
+            updateNextButtonState();
+            instruction.textContent = '';
+            canvas.style.display = 'none';
+            undoBtn.style.display = 'none';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function buildRiskPanel() {
+            riskAssessmentPanel.innerHTML = '';
+
+            riskCategories.forEach(cat => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'risk-question';
+                questionDiv.setAttribute('data-risk-id', cat.id);
+
+                const title = document.createElement('h4');
+                title.textContent = translations[cat.key][currentLang];
+                questionDiv.appendChild(title);
+
+                const options = document.createElement('div');
+                options.className = 'rating-options';
+
+                ratingLevels.forEach(level => {
+                    const btn = document.createElement('button');
+                    btn.className = 'rating-btn';
+                    btn.setAttribute('data-value', level.value);
+                    btn.textContent = translations[level.key][currentLang];
+                    btn.addEventListener('click', () => selectRating(cat.id, level.value, btn));
+                    options.appendChild(btn);
+                });
+
+                questionDiv.appendChild(options);
+
+                // Draw prompt
+                const prompt = document.createElement('div');
+                prompt.className = 'draw-prompt';
+                prompt.textContent = translations.draw_prompt[currentLang];
+                questionDiv.appendChild(prompt);
+
+                riskAssessmentPanel.appendChild(questionDiv);
+            });
+        }
+
+        function selectRating(riskId, value, btnElement) {
+            // Update rating
+            currentRatings[riskId] = value;
+
+            // Update button styling
+            const questionDiv = btnElement.closest('.risk-question');
+            questionDiv.querySelectorAll('.rating-btn').forEach(btn => {
+                btn.classList.remove('selected', 'high-risk');
+            });
+            btnElement.classList.add('selected');
+            if (value >= 4) {
+                btnElement.classList.add('high-risk');
+            }
+
+            // Handle drawing requirement
+            const prompt = questionDiv.querySelector('.draw-prompt');
+            if (value >= 4) {
+                questionDiv.classList.add('requires-drawing');
+                questionDiv.classList.remove('drawing-complete');
+                prompt.classList.add('visible');
+
+                // Start drawing mode for this risk
+                startDrawingMode(riskId);
+            } else {
+                questionDiv.classList.remove('requires-drawing', 'drawing-complete');
+                prompt.classList.remove('visible');
+                currentCircles[riskId] = [];
+            }
+
+            updateNextButtonState();
+        }
+
+        function startDrawingMode(riskId) {
+            drawingForRisk = riskId;
+            canvas.style.display = 'block';
+            undoBtn.style.display = 'block';
+
+            const riskName = translations[riskCategories.find(c => c.id === riskId).key][currentLang];
+            instruction.textContent = translations.instruction_draw[currentLang](riskName);
+
+            // Set up canvas events
+            canvas.onmousedown = onMouseDown;
+            canvas.onmousemove = onMouseMove;
+            canvas.onmouseup = onMouseUp;
+            canvas.ontouchstart = onTouchStart;
+            canvas.ontouchmove = onTouchMove;
+            canvas.ontouchend = onTouchEnd;
+        }
+
+        function onMouseDown(e) {
+            if (!drawingForRisk) return;
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            circleStart = {
+                x: (e.clientX - rect.left) * (canvas.width / rect.width),
+                y: (e.clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+
+        function onMouseMove(e) {
+            if (!isDrawing || !circleStart) return;
+            const rect = canvas.getBoundingClientRect();
+            const currentX = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const currentY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+            redrawCanvas();
+
+            // Draw current circle
+            const radius = Math.sqrt(Math.pow(currentX - circleStart.x, 2) + Math.pow(currentY - circleStart.y, 2));
+            ctx.beginPath();
+            ctx.arc(circleStart.x, circleStart.y, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#ff4444';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
+        function onMouseUp(e) {
+            if (!isDrawing || !circleStart) return;
+            isDrawing = false;
+
+            const rect = canvas.getBoundingClientRect();
+            const endX = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const endY = (e.clientY - rect.top) * (canvas.height / rect.height);
+            const radius = Math.sqrt(Math.pow(endX - circleStart.x, 2) + Math.pow(endY - circleStart.y, 2));
+
+            if (radius > 10) {
+                const circle = {
+                    x: circleStart.x,
+                    y: circleStart.y,
+                    radius: radius,
+                    riskId: drawingForRisk
+                };
+                currentCircles[drawingForRisk].push(circle);
+
+                // Mark as complete
+                const questionDiv = document.querySelector(`[data-risk-id="${drawingForRisk}"]`);
+                questionDiv.classList.remove('requires-drawing');
+                questionDiv.classList.add('drawing-complete');
+                questionDiv.querySelector('.draw-prompt').classList.remove('visible');
+            }
+
+            circleStart = null;
+            redrawCanvas();
+            updateNextButtonState();
+        }
+
+        // Touch events for mobile
+        function onTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            onMouseDown({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+
+        function onTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            onMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+
+        function onTouchEnd(e) {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            onMouseUp({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+
+        function redrawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw all circles
+            Object.values(currentCircles).flat().forEach(circle => {
+                ctx.beginPath();
+                ctx.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI);
+                ctx.strokeStyle = '#ff4444';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            });
+        }
+
+        undoBtn.addEventListener('click', () => {
+            if (drawingForRisk && currentCircles[drawingForRisk].length > 0) {
+                currentCircles[drawingForRisk].pop();
+                redrawCanvas();
+
+                // Check if still needs drawing
+                const questionDiv = document.querySelector(`[data-risk-id="${drawingForRisk}"]`);
+                if (currentCircles[drawingForRisk].length === 0 && currentRatings[drawingForRisk] >= 4) {
+                    questionDiv.classList.add('requires-drawing');
+                    questionDiv.classList.remove('drawing-complete');
+                    questionDiv.querySelector('.draw-prompt').classList.add('visible');
+                }
+
+                updateNextButtonState();
+            }
+        });
+
+        function updateNextButtonState() {
+            let allRated = true;
+            let allDrawn = true;
+
+            riskCategories.forEach(cat => {
+                if (currentRatings[cat.id] === null) {
+                    allRated = false;
+                }
+                if (currentRatings[cat.id] >= 4 && currentCircles[cat.id].length === 0) {
+                    allDrawn = false;
+                }
+            });
+
+            nextBtn.disabled = !(allRated && allDrawn);
+        }
+
+        nextBtn.addEventListener('click', () => {
+            // Save current image results
+            const result = {
+                imagePath: allImages[currentImageIndex],
+                ratings: { ...currentRatings },
+                circles: JSON.parse(JSON.stringify(currentCircles))
+            };
+            allResults.push(result);
+
+            currentImageIndex++;
+            loadImage();
+        });
+
+        function showEndScreen() {
+            experimentScreen.style.display = 'none';
+            endScreen.style.display = 'flex';
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            downloadCSV();
+        });
+
+        function downloadCSV() {
+            // CSV Header
+            let csv = 'image_path,fire_rating,burn_rating,ingestion_rating,fall_rating,damage_rating,cut_rating,fire_circles,burn_circles,ingestion_circles,fall_circles,damage_circles,cut_circles\n';
+
+            allResults.forEach(result => {
+                const row = [
+                    result.imagePath,
+                    result.ratings.fire || '',
+                    result.ratings.burn || '',
+                    result.ratings.ingestion || '',
+                    result.ratings.fall || '',
+                    result.ratings.damage || '',
+                    result.ratings.cut || '',
+                    JSON.stringify(result.circles.fire || []),
+                    JSON.stringify(result.circles.burn || []),
+                    JSON.stringify(result.circles.ingestion || []),
+                    JSON.stringify(result.circles.fall || []),
+                    JSON.stringify(result.circles.damage || []),
+                    JSON.stringify(result.circles.cut || [])
+                ];
+                csv += row.map(v => `"${v}"`).join(',') + '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `risk_assessment_results_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // --- 初期化 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage('ja');
+        });
+    </script>
+</body>
+
+</html>
