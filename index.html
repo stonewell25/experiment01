@@ -1,92 +1,277 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Feedback Experiment / 画像フィードバック実験</title>
+    <title>リスク評価実験 / Risk Assessment Experiment</title>
     <style>
-        /* CSS (デザイン) */
+        /* CSS Variables for theming */
+        :root {
+            --primary-color: #4a6cf7;
+            --primary-hover: #3b5de7;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: sans-serif; display: flex;
-            justify-content: center; align-items: center;
-            flex-direction: column; min-height: 100vh;
-            margin: 0; padding: 20px 0; background-color: #f0f0f0;
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
         }
+
         .lang-switcher {
-            position: absolute; top: 15px; right: 20px;
+            position: fixed;
+            top: 20px;
+            right: 25px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 16px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
         }
+
         .lang-switcher button {
-            background: none; border: none; cursor: pointer;
-            font-size: 1em; color: #007bff; padding: 5px;
-            text-decoration: underline;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95em;
+            color: var(--primary-color);
+            padding: 5px 10px;
+            font-weight: 600;
+            transition: var(--transition);
         }
+
+        .lang-switcher button:hover {
+            color: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        .lang-switcher button.active {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 15px;
+        }
+
         #start-screen {
-            max-width: 800px; padding: 40px; background-color: white;
-            border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 900px;
+            padding: 50px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
             text-align: left;
+            backdrop-filter: blur(20px);
         }
-        #start-screen h1 { text-align: center; }
-        #start-screen ul, #start-screen ol { padding-left: 20px; }
+
+        #start-screen h1 {
+            text-align: center;
+            font-size: 2em;
+            background: var(--bg-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 25px;
+        }
+
+        #start-screen p {
+            line-height: 1.8;
+            color: #555;
+        }
+
+        #start-screen h3 {
+            margin-top: 25px;
+            margin-bottom: 12px;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        #start-screen ul,
+        #start-screen ol {
+            padding-left: 25px;
+            line-height: 1.9;
+            color: #555;
+        }
+
+        /* Risk category explanations */
+        .risk-explanations {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+        }
+
+        .risk-explanations h4 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .risk-explanation-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .risk-explanation-item strong {
+            color: var(--primary-color);
+            min-width: 80px;
+        }
+
+        .risk-explanation-item span {
+            color: #555;
+        }
+
+        /* Name input styling */
+        .name-input-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+        }
+
+        .name-input-section label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .name-input-section input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .name-input-section input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+        }
+
         #start-experiment-btn {
-            display: block; width: 60%; margin: 30px auto 0;
-            padding: 15px; font-size: 1.2em; cursor: pointer;
-            background-color: #007bff; color: white; border: none;
-            border-radius: 5px;
+            display: block;
+            width: 70%;
+            margin: 40px auto 0;
+            padding: 18px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--bg-gradient);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            box-shadow: 0 8px 25px rgba(74, 108, 247, 0.4);
+            transition: var(--transition);
         }
-        #experiment-screen {
-            display: none; flex-direction: column; align-items: center;
+
+        #start-experiment-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(74, 108, 247, 0.5);
         }
-        .image-container {
-            position: relative; width: 800px; height: 600px;
-            border: 1px solid #ccc; background-color: #fff;
-        }
-        #mainImage { width: 100%; height: 100%; object-fit: contain; }
-        canvas {
-            position: absolute; top: 0; left: 0; width: 100%;
-            height: 100%; cursor: crosshair; display: none;
-        }
-        .controls {
-            display: flex; align-items: center; gap: 15px; margin-top: 10px;
-        }
-        .btn {
-            font-size: 1.1em; padding: 8px 20px; cursor: pointer;
-            color: white; border: none; border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-        
-        .btn:hover:not(:disabled) {
-            opacity: 0.9;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        #mappingBtn { background-color: #007bff; }
-        #undoBtn { background-color: #ffc107; color: black; }
-        .btn {
-            background-color: #007bff;
-        }
-        .btn:disabled {
-            background-color: #ccc;
+
+        #start-experiment-btn:disabled {
+            background: #ccc;
             cursor: not-allowed;
-            opacity: 0.6;
-            color: #666;
-            transform: none;
             box-shadow: none;
         }
-        /* --- ▼▼▼ UI改善のためのCSS変更箇所 ▼▼▼ --- */
-        #stateSelectionPanel {
-            display: none; /* 最初は非表示 */
+
+        #experiment-screen {
+            display: none;
             flex-direction: column;
             align-items: center;
-            width: 800px;
-            margin-top: 15px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
-            position: relative;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            max-width: 1000px;
+            width: 100%;
         }
+
+        #session-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        #progress-info {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .image-container {
+            position: relative;
+            width: 640px;
+            height: 480px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            background-color: #f8f9fa;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #mainImage {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            display: none;
+        }
+
+        /* Risk Assessment Panel */
+        #riskAssessmentPanel {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 25px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: var(--border-radius);
+            border: 1px solid #dee2e6;
+        }
+
+        #riskAssessmentPanel.visible {
+            display: block;
+        }
+
         .close-btn {
             position: absolute;
             top: 10px;
@@ -99,34 +284,219 @@
             cursor: pointer;
             padding: 0;
         }
+
         .close-btn:hover {
             color: #333;
         }
 
-        
-        #stateSelectionPanel.visible {
-            display: flex; /* 表示する時はflexに */
+        .panel-header {
+            position: relative;
+            text-align: center;
+            margin-bottom: 20px;
         }
-        .state-options {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3列で表示 */
-            gap: 10px 20px; /* 縦横の間隔 */
-            width: 100%;
-            margin: 15px 0;
+
+        .panel-header h3 {
+            color: #333;
         }
+
+        .risk-question {
+            margin-bottom: 12px;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .risk-question:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .risk-question.selected {
+            border-left: 4px solid var(--primary-color);
+            background: #f0f4ff;
+        }
+
+        .risk-question.no-risk-selected {
+            border-left: 4px solid var(--success-color);
+            background: #f0fff4;
+        }
+
+        .risk-checkbox {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        .risk-question label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .risk-question h4 {
+            font-size: 1em;
+            color: #333;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* Info tooltip */
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.75em;
+            font-weight: bold;
+            cursor: help;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .info-icon:hover .tooltip {
+            display: block;
+        }
+
+        .tooltip {
+            display: none;
+            position: absolute;
+            bottom: 130%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            font-weight: normal;
+            min-width: 350px;
+            max-width: 450px;
+            white-space: normal;
+            line-height: 1.5;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            text-align: left;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: #333;
+        }
+
+        /* No risk option */
+        .no-risk-option {
+            margin-top: 15px;
+            padding: 15px 20px;
+            background: #e8f5e9;
+            border-radius: 12px;
+            border: 2px dashed var(--success-color);
+        }
+
+        .no-risk-option label {
+            font-weight: 600;
+            color: var(--success-color);
+        }
+
+        /* Start Drawing Button */
         #startDrawingBtn {
-            margin-top: 10px;
+            margin-top: 20px;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            background: var(--bg-gradient);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(74, 108, 247, 0.4);
         }
-        /* --- ▲▲▲ UI改善のためのCSS変更箇所 ▲▲▲ --- */
-        #instruction {
-            margin-top: 10px; font-weight: bold;
-            color: #d9534f; height: 20px;
+
+        #startDrawingBtn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 108, 247, 0.5);
         }
+
+        #startDrawingBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            font-size: 1.1em;
+            padding: 12px 25px;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+            color: #666;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #mappingBtn {
+            background: var(--bg-gradient);
+        }
+
         #undoBtn {
-            display: none; /* 初期状態で非表示 */
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: #333;
+            display: none;
         }
-        
-        /* 確認ダイアログのスタイル */
+
+        #downloadBtn {
+            background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+        }
+
+        #instruction {
+            margin-top: 15px;
+            font-weight: 600;
+            color: var(--danger-color);
+            height: 24px;
+            font-size: 1.05em;
+        }
+
+        /* Confirmation Dialog */
         #confirmDialog {
             position: fixed;
             top: 0;
@@ -134,45 +504,102 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
-        
+
         .dialog-content {
             background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             text-align: center;
-            max-width: 400px;
+            max-width: 420px;
             width: 90%;
         }
-        
+
+        .dialog-content h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .dialog-content p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
         .dialog-buttons {
-            margin-top: 20px;
             display: flex;
             gap: 15px;
             justify-content: center;
         }
-        
+
         .dialog-buttons .btn {
-            min-width: 80px;
+            min-width: 100px;
         }
-        
-        .dialog-buttons .btn:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-            opacity: 0.6;
+
+        .dialog-buttons #confirmYes {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .dialog-buttons #confirmNo {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+        }
+
+        /* End Screen */
+        #end-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 60px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+
+        #end-screen h1 {
+            background: var(--bg-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        #end-screen p {
             color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .image-container {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 4/3;
+            }
+
+            .risk-question {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .tooltip {
+                max-width: 200px;
+                left: 0;
+                transform: none;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="lang-switcher">
-        <button id="lang-ja">日本語</button> / <button id="lang-en">English</button>
+        <button id="lang-ja" class="active">日本語</button> / <button id="lang-en">English</button>
     </div>
 
     <div id="start-screen">
@@ -180,411 +607,905 @@
         <p data-translate="welcome_intro"></p>
         <h3 data-translate="overview_title"></h3>
         <ul data-translate="overview_list"></ul>
+
+        <div class="risk-explanations">
+            <h4 data-translate="risk_explanation_title"></h4>
+            <div id="risk-explanation-list"></div>
+        </div>
+
         <h3 data-translate="how_to_title"></h3>
         <ol data-translate="how_to_list"></ol>
-        <button id="start-experiment-btn" data-translate="start_button"></button>
+
+        <div class="name-input-section">
+            <label data-translate="name_label"></label>
+            <input type="text" id="participantName" placeholder="" data-translate-placeholder="name_placeholder">
+        </div>
+
+        <button id="start-experiment-btn" data-translate="start_button" disabled></button>
     </div>
 
     <div id="experiment-screen">
         <h2 id="session-title"></h2>
+        <p id="progress-info"></p>
         <div class="image-container">
             <img id="mainImage" src="" alt="Experiment Image">
             <canvas id="drawingCanvas"></canvas>
         </div>
+
         <div class="controls">
             <button id="mappingBtn" class="btn" data-translate="mapping_button"></button>
             <button id="undoBtn" class="btn" data-translate="undo_button" disabled></button>
         </div>
         <div id="instruction"></div>
 
-        <div id="stateSelectionPanel">
-            <button id="closeSelectionPanelBtn" class="close-btn">&times;</button>
-            <h3 data-translate="modal_title"></h3>
-            <div class="state-options">
-                <label><input type="checkbox" name="state" value="Clean"> <span data-translate="state_clean"></span></label>
-                <label><input type="checkbox" name="state" value="Scattered"> <span data-translate="state_scattered"></span></label>
-                <label><input type="checkbox" name="state" value="Broken"> <span data-translate="state_broken"></span></label>
-                <label><input type="checkbox" name="state" value="Wet"> <span data-translate="state_wet"></span></label>
-                <label><input type="checkbox" name="state" value="Risk"> <span data-translate="state_risk"></span></label>
+        <div id="riskAssessmentPanel">
+            <div class="panel-header">
+                <button id="closeSelectionPanelBtn" class="close-btn">&times;</button>
+                <h3 data-translate="modal_title"></h3>
             </div>
-            <button id="startDrawingBtn" class="btn" data-translate="start_drawing_button" disabled></button>
+            <div id="riskCheckboxList"></div>
+            <div class="no-risk-option">
+                <label>
+                    <input type="checkbox" id="noRiskCheckbox" class="risk-checkbox">
+                    <span data-translate="no_risk_option"></span>
+                </label>
+            </div>
+            <button id="startDrawingBtn" data-translate="start_drawing_button" disabled></button>
         </div>
-        
-        <!-- 確認ダイアログ -->
-        <div id="confirmDialog" style="display: none;">
-            <div class="dialog-content">
-                <h3 data-translate="confirm_title"></h3>
-                <p data-translate="confirm_message"></p>
-                <div class="dialog-buttons">
-                    <button id="confirmYes" class="btn" data-translate="confirm_yes"></button>
-                    <button id="confirmNo" class="btn" data-translate="confirm_no"></button>
-                </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div id="confirmDialog">
+        <div class="dialog-content">
+            <h3 data-translate="confirm_title"></h3>
+            <p data-translate="confirm_message"></p>
+            <div class="dialog-buttons">
+                <button id="confirmYes" class="btn" data-translate="confirm_yes"></button>
+                <button id="confirmNo" class="btn" data-translate="confirm_no"></button>
             </div>
         </div>
-        </div>
+    </div>
+
+    <div id="end-screen">
+        <h1 data-translate="end_title"></h1>
+        <p data-translate="end_message"></p>
+        <button id="downloadBtn" class="btn" data-translate="download_button"></button>
+    </div>
 
     <script>
-    // --- ★★★ 実験設定 ★★★ --- (変更なし)
-    const practiceImages = [ 'images/practice1.jpg', 'images/practice2.jpg', 'images/practice3.jpg', 'images/practice4.jpg' ];
-    const mainImages = ['images/livinglab_clutter.jpg', 'images/living_risk.jpg', 'images/kitchen_clutter_01.png', 'images/kitchen_clutter_02.png', 'images/kitchen_wet_01.png', 'images/kitchen_wet_02.png', 'images/student_space_risk_01.png', 'images/student_space_risk_02.png', 'images/student_space_risk_03.png', 'images/student_space_risk_04.png' ];
-    const a_gas_url = 'https://script.google.com/macros/s/AKfycbzO-eA9nXtnTD3jSLdvDiagWK2xQZ1wotjPWOTpOrFakRkZKrlP1sdv5aGeUWV4gCFRWg/exec';
+        // --- 画像設定 ---
+        // 練習用画像
+        const practiceImages = [
+            'images_ar/practice/practice1.jpg',
+            'images_ar/practice/practice2.jpg',
+            'images_ar/practice/practice3.jpg',
+            'images_ar/practice/practice4.jpg'
+        ];
 
-    // --- テキスト管理 --- (変更なし)
-    const translations = {
-        welcome_title: { ja: "フィードバック実験へようこそ", en: "Welcome to the Feedback Experiment" },
-        welcome_intro: { ja: "この実験にご協力いただき、ありがとうございます。以下の説明をよくお読みの上、ご参加ください。", en: "Thank you for participating in this experiment. Please read the instructions below carefully before you begin." },
-        overview_title: { ja: "実験の概要", en: "Experiment Overview" },
-        overview_list: {
-            ja: `<li>合計12枚（練習4枚、本番8枚）の画像を見て、特定の状態が感じられる箇所を四角形で囲っていただきます。</li><li>対象となる状態は <strong>{清潔, 散乱, 濡れ, 壊れている, リスクがある}</strong> の5つです。</li><li>1つの箇所に対して、複数の状態を定義することも可能です。（例：「濡れていてリスクがある」など）</li>`,
-            en: `<li>You will be shown a total of 12 images (4 for practice, 8 for the main task). For each image, you will draw rectangles around areas where you perceive certain states.</li><li>The states are: <strong>{Clean, Scattered, Wet, Broken, Risk}</strong>.</li><li>It is possible to define multiple states for the same area (e.g., an area can be both "Wet" and a "Risk").</li>`
-        },
-        how_to_title: { ja: "操作方法", en: "How to Operate" },
-        how_to_list: {
-            ja: `<li>「マッピング」ボタンを押し、画像から感じる状態を複数選択します。</li><li>「描画を開始」ボタンを押します。</li><li>指示に従い、該当する箇所をマウスでドラッグして四角で囲みます。</li><li>選択した全ての状態について描画が完了すると、データが自動で保存され、次の画像に進みます。</li>`,
-            en: `<li>Click the "Mapping" button and select one or more states you perceive in the image.</li><li>Click the "Start Drawing" button.</li><li>Follow the instructions to draw a rectangle by dragging your mouse over the corresponding area.</li><li>Once you have drawn areas for all selected states, the data will be saved automatically, and you will proceed to the next image.</li>`
-        },
-        start_button: { ja: "練習を開始する", en: "Start Practice" },
-        mapping_button: { ja: "マッピング", en: "Mapping" },
-        back_to_selection: { ja: "状態の選択に戻る", en: "Back to Selection" },
-        undo_button: { ja: "一つ前に戻る", en: "Undo" },
-        modal_title: { ja: "あなたの感じる状態を選択してください (複数選択可)", en: "Select the state(s) you perceive (multiple selections allowed)" },
-        state_clean: { ja: "清潔", en: "Clean" },
-        state_scattered: { ja: "散乱", en: "Scattered" },
-        state_broken: { ja: "壊れている", en: "Broken" },
-        state_wet: { ja: "濡れ", en: "Wet" },
-        state_risk: { ja: "リスクがある", en: "Risk" },
-        start_drawing_button: { ja: "描画を開始", en: "Start Drawing" },
-        session_practice: { ja: "練習セッション", en: "Practice Session" },
-        session_main: { ja: "本番セッション", en: "Main Session" },
-        instruction_image: { ja: (current, total) => `画像 ${current} / ${total}`, en: (current, total) => `Image ${current} / ${total}` },
-        instruction_draw: { ja: (state) => `【${state}】と感じる部分を四角で囲ってください。`, en: (state) => `Please draw a rectangle around the area you feel is [${state}].` },
-        alert_practice_end: { ja: "練習はこれで終わりです。次に本番のセッションを開始します。", en: "The practice session is now complete. The main session will begin next." },
-        alert_experiment_end: { ja: "全ての実験が終了しました。ご協力ありがとうございました。", en: "The experiment is now finished. Thank you for your cooperation." },
-        alert_select_state: { ja: "少なくとも1つの状態を選択してください。", en: "Please select at least one state." },
-        status_saving: { ja: "データを保存中...", en: "Saving data..." },
-        status_save_complete: { ja: "データの保存が完了しました。", en: "Save complete." },
-        status_save_error: { ja: "エラー：データの保存に失敗しました。", en: "Error: Failed to save data." },
-        status_practice_complete: { ja: "練習完了。次の画像に進みます。", en: "Practice complete. Proceeding to the next image." },
-        confirm_title: { ja: "確認", en: "Confirmation" },
-        confirm_message: { ja: "この四角形で確定しますか？", en: "Are you sure you want to confirm this rectangle?" },
-        confirm_yes: { ja: "はい", en: "Yes" },
-        confirm_no: { ja: "いいえ", en: "No" },
-    };
-    let currentLang = 'ja';
+        // Kitchen の画像
+        const kitchenImages = [
+            'images_ar/kitchen/mozaiku_obs_20251227_041959_cc1d2e36/rgb.jpg',
+            'images_ar/kitchen/mozaiku_obs_20251227_042101_ff99bb47/rgb.jpg',
+            'images_ar/kitchen/obs_20251227_042419_719a8cf2/rgb.jpg',
+            'images_ar/kitchen/obs_20251227_042955_c6210061/rgb.jpg',
+            'images_ar/kitchen/obs_20251227_043054_8ce47229/rgb.jpg',
+            'images_ar/kitchen/obs_20251227_043202_a371e222/rgb.jpg'
+        ];
 
-    // --- 言語切替機能 --- (変更なし)
-    function setLanguage(lang) {
-        currentLang = lang; document.documentElement.lang = lang;
-        document.querySelectorAll('[data-translate]').forEach(el => {
-            const key = el.dataset.translate;
-            if (translations[key] && translations[key][lang]) { el.innerHTML = translations[key][lang]; }
-        });
-        document.querySelectorAll('.state-options input[type="checkbox"]').forEach(checkbox => {
-            const stateKey = `state_${checkbox.nextElementSibling.dataset.translate.split('_')[1]}`;
-            if (translations[stateKey]) { checkbox.value = translations[stateKey]['en']; }
-        });
-    }
-    document.getElementById('lang-ja').addEventListener('click', () => setLanguage('ja'));
-    document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+        // Livinglab の画像
+        const livinglabImages = [
+            'images_ar/livinglab/obs_20251227_005248_bebad969/rgb.jpg',
+            'images_ar/livinglab/obs_20251227_010207_e5edc8f5/rgb.jpg',
+            'images_ar/livinglab/obs_20251227_010225_4f95f5a5/rgb.jpg',
+            'images_ar/livinglab/obs_20251227_010434_c104a944/rgb.jpg',
+            'images_ar/livinglab/モザイク入れるobs_20251227_010620_bf674b97/rgb.jpg',
+            'images_ar/livinglab/obs_20251227_010932_db273de0/rgb.jpg'
+        ];
 
-    // --- 要素取得と変数定義 ---
-    const startScreen = document.getElementById('start-screen');
-    const experimentScreen = document.getElementById('experiment-screen');
-    const startExperimentBtn = document.getElementById('start-experiment-btn');
-    const sessionTitle = document.getElementById('session-title');
-    const mainImage = document.getElementById('mainImage');
-    const mappingBtn = document.getElementById('mappingBtn');
-    const backToSelectionBtn = document.getElementById('backToSelectionBtn');
-    const undoBtn = document.getElementById('undoBtn');
-    const stateSelectionPanel = document.getElementById('stateSelectionPanel');
-    const closeSelectionPanelBtn = document.getElementById('closeSelectionPanelBtn');
-    const startDrawingBtn = document.getElementById('startDrawingBtn');
-    const canvas = document.getElementById('drawingCanvas');
-    const instruction = document.getElementById('instruction');
-    const ctx = canvas.getContext('2d');
-    const confirmDialog = document.getElementById('confirmDialog');
-    const confirmYes = document.getElementById('confirmYes');
-    const confirmNo = document.getElementById('confirmNo');
-    let currentImageList = [], currentImageIndex = 0, isPractice = true, selectedStates = [], currentStateIndex = 0, annotations = {}, drawnRects = [], isDrawing = false, startX, startY, isDrawingMode = false, pendingRect = null;
-    const checkboxes = document.querySelectorAll('.state-options input[type="checkbox"]');
-
-    // --- ▼▼▼ ボタン状態管理のロジック ▼▼▼ ---
-    function updateStartDrawingButtonState() {
-        const isAnyChecked = Array.from(checkboxes).some(cb => cb.checked);
-        startDrawingBtn.disabled = !isAnyChecked;
-    }
-
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateStartDrawingButtonState);
-    });
-    // --- ▲▲▲ ボタン状態管理のロジック ▲▲▲ ---
-
-    // --- 実験フロー ---
-    startExperimentBtn.addEventListener('click', () => {
-        startScreen.style.display = 'none';
-        experimentScreen.style.display = 'flex';
-        startSession(true);
-    });
-
-    mappingBtn.addEventListener('click', () => {
-        console.log('mappingBtn clicked, isDrawingMode:', isDrawingMode); // デバッグ用
-    
-    // 描画中の場合（canvas が表示されている場合）
-       // 描画中の場合
-       if (isDrawingMode) {
-        console.log('Drawing mode detected, stopping drawing'); // デバッグ用
-        // 描画を中断して状態選択に戻る
-        canvas.style.display = 'none';
-        stateSelectionPanel.classList.add('visible');
-        isDrawingMode = false; // フラグをリセット
-        
-        // ボタンテキストを「マッピング」に戻す
-        mappingBtn.setAttribute('data-translate', 'mapping_button');
-        setLanguage(currentLang);
-        
-        // 戻るボタンを非表示にする
-        undoBtn.style.display = 'none';
-        instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
-        
-        
-        // 描画状態をリセット
-        drawnRects = [];
-        currentStateIndex = 0;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        return;
-    }
-
-        console.log('Normal mapping process'); // デバッグ用
-
-        // 通常のマッピング処理
-        stateSelectionPanel.classList.add('visible');
-        mappingBtn.disabled = true;
-        updateStartDrawingButtonState();
-        stateSelectionPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-
-    closeSelectionPanelBtn.addEventListener('click', () => {
-        stateSelectionPanel.classList.remove('visible');
-        mappingBtn.disabled = false;
-        document.querySelectorAll('input[name="state"]:checked').forEach(cb => cb.checked = false);
-        updateStartDrawingButtonState(); // パネルを閉じる時もボタンの状態をリセット
-    });
-
-    startDrawingBtn.addEventListener('click', () => {
-        console.log('startDrawingBtn clicked'); // デバッグ用
-    
-        if (startDrawingBtn.disabled) return;
-        
-        stateSelectionPanel.classList.remove('visible');
-        
-        // ボタンテキストを「状態の選択に戻る」に変更
-        mappingBtn.setAttribute('data-translate', 'back_to_selection');
-        setLanguage(currentLang);
-        
-        selectedStates = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
-        currentStateIndex = 0;
-        drawnRects = [];
-        
-        canvas.style.display = 'block';
-        undoBtn.style.display = 'block';
-        undoBtn.disabled = false;
-        isDrawingMode = true; // フラグを設定
-        
-        // mappingBtn を有効にする（重要！）
-        mappingBtn.disabled = false;
-    
-        console.log('isDrawingMode set to:', isDrawingMode); // デバッグ用
-    
-        startDrawingForCurrentState();
-        });
-
-    function resetForNextImage(delay) {
-        setTimeout(() => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            canvas.style.display = 'none';
-            stateSelectionPanel.classList.remove('visible');
-            checkboxes.forEach(cb => cb.checked = false);
-            
-            currentImageIndex++;
-            loadImage();
-        }, delay);
-    }
-
-    // --- ページの初期化 ---
-    document.addEventListener('DOMContentLoaded', () => {
-        setLanguage('ja');
-    });
-
-    // --- ▼▼▼ 以下、変更不要な関数群 ▼▼▼ ---
-    function startSession(isPracticeSession) {
-        isPractice = isPracticeSession; currentImageIndex = 0;
-        if (isPractice) {
-            sessionTitle.textContent = translations.session_practice[currentLang]; currentImageList = practiceImages;
-        } else {
-            sessionTitle.textContent = translations.session_main[currentLang]; currentImageList = mainImages;
-        }
-        loadImage();
-    }
-    function loadImage() {
-        if (currentImageIndex >= currentImageList.length) {
-            if (isPractice) {
-                alert(translations.alert_practice_end[currentLang]); startSession(false);
-            } else {
-                experimentScreen.innerHTML = `<h1>${translations.alert_experiment_end[currentLang]}</h1>`;
+        // NYUデータセットからランダムに10枚を選択する関数
+        function generateNyuImages() {
+            const totalNyuImages = 1449;
+            const selectedIndices = [];
+            while (selectedIndices.length < 10) {
+                const randomIndex = Math.floor(Math.random() * totalNyuImages);
+                if (!selectedIndices.includes(randomIndex)) {
+                    selectedIndices.push(randomIndex);
+                }
             }
-            return;
+            return selectedIndices.map(idx => {
+                const paddedIdx = String(idx).padStart(5, '0');
+                return `images_ar/nyu_exported_images/rgb/nyu_${paddedIdx}.png`;
+            });
         }
-        const imageName = currentImageList[currentImageIndex];
-        mainImage.crossOrigin = "Anonymous"; mainImage.src = imageName;
-        mainImage.onload = () => {
-            const container = document.querySelector('.image-container');
-            canvas.width = mainImage.naturalWidth; canvas.height = mainImage.naturalHeight;
-            container.style.width = mainImage.clientWidth + 'px'; container.style.height = mainImage.clientHeight + 'px';
+
+        // 6つのリスクカテゴリ
+        const riskCategories = [
+            { id: 'fire', key: 'risk_fire', descKey: 'risk_fire_desc' },
+            { id: 'burn', key: 'risk_burn', descKey: 'risk_burn_desc' },
+            { id: 'ingestion', key: 'risk_ingestion', descKey: 'risk_ingestion_desc' },
+            { id: 'fall', key: 'risk_fall', descKey: 'risk_fall_desc' },
+            { id: 'damage', key: 'risk_damage', descKey: 'risk_damage_desc' },
+            { id: 'cut', key: 'risk_cut', descKey: 'risk_cut_desc' }
+        ];
+
+        // --- テキスト管理 ---
+        const translations = {
+            welcome_title: { ja: "リスク評価実験へようこそ", en: "Welcome to the Risk Assessment Experiment" },
+            welcome_intro: { ja: "この実験にご協力いただき、ありがとうございます。以下の説明をよくお読みの上、ご参加ください。", en: "Thank you for participating in this experiment. Please read the instructions below carefully before you begin." },
+            overview_title: { ja: "実験の概要", en: "Experiment Overview" },
+            overview_list: {
+                ja: `<li>最初に練習セッション（4枚）があり、その後に本番セッション（22枚）があります。</li>
+                     <li>各画像について、6つのリスクカテゴリについてリスクが「ある」か確認してください。</li>
+                     <li>リスクが「ある」と判断した場合、そのリスク箇所を自由な形で囲んでいただきます。</li>
+                     <li>リスクがない場合は「リスクはない」を選択してください。</li>`,
+                en: `<li>There will be a practice session (4 images) followed by the main session (22 images).</li>
+                     <li>For each image, check if there is a risk for any of the 6 categories.</li>
+                     <li>If you identify a risk, you will draw a freeform shape around the risky area.</li>
+                     <li>If there is no risk, select "No risk".</li>`
+            },
+            risk_explanation_title: { ja: "リスクカテゴリの説明", en: "Risk Category Explanations" },
+
+            risk_fire: { ja: "火事", en: "Fire" },
+            risk_fire_desc: { ja: "火災が発生する可能性があるリスク。コンロの近くに可燃物がある、電気配線の問題など。", en: "Risk of fire occurring. Flammable materials near stove, electrical wiring issues, etc." },
+
+            risk_burn: { ja: "火傷", en: "Burn" },
+            risk_burn_desc: { ja: "熱いものに触れて火傷する可能性があるリスク。熱いやかん、コンロ、アイロンなど。", en: "Risk of getting burned by hot objects. Hot kettle, stove, iron, etc." },
+
+            risk_ingestion: { ja: "誤飲", en: "Ingestion" },
+            risk_ingestion_desc: { ja: "小さな物体や危険な液体を誤って飲み込む可能性があるリスク。小さな部品、洗剤、薬品など。", en: "Risk of accidentally swallowing small objects or dangerous liquids. Small parts, detergents, chemicals, etc." },
+
+            risk_fall: { ja: "転倒", en: "Fall" },
+            risk_fall_desc: { ja: "つまずいたり滑ったりして転倒する可能性があるリスク。床の障害物、濡れた床、ケーブルなど。", en: "Risk of tripping or slipping. Floor obstacles, wet floor, cables, etc." },
+
+            risk_damage: { ja: "物体破損", en: "Object Damage" },
+            risk_damage_desc: { ja: "物が落ちたり壊れたりする可能性があるリスク。不安定な物の配置、重いものの上の軽いものなど。", en: "Risk of objects falling or breaking. Unstable object placement, light items on heavy ones, etc." },
+
+            risk_cut: { ja: "切傷", en: "Cut" },
+            risk_cut_desc: { ja: "鋭利なもので切り傷を負う可能性があるリスク。包丁、ハサミ、割れたガラスなど。", en: "Risk of getting cut by sharp objects. Knives, scissors, broken glass, etc." },
+
+            how_to_title: { ja: "操作方法", en: "How to Operate" },
+            how_to_list: {
+                ja: `<li>「マッピング」ボタンを押し、画像から感じるリスクを選択します。</li>
+                     <li>「描画を開始」ボタンを押します。</li>
+                     <li>指示に従い、リスク箇所をマウスでドラッグして囲みます。</li>
+                     <li>描画後、確認画面で「はい」を押すと確定します。「いいえ」を押すとやり直しできます。</li>
+                     <li>「一つ前に戻る」ボタンで前のカテゴリをやり直すこともできます。</li>
+                     <li>選択した全てのリスクについて描画が完了すると、データが保存され次の画像に進みます。</li>`,
+                en: `<li>Click the "Mapping" button and select the risks you perceive in the image.</li>
+                     <li>Click the "Start Drawing" button.</li>
+                     <li>Follow the instructions to draw around the risky area by dragging your mouse.</li>
+                     <li>After drawing, click "Yes" in the confirmation dialog to confirm. Click "No" to redraw.</li>
+                     <li>You can also use the "Undo" button to go back to the previous category.</li>
+                     <li>Once all selected risks are drawn, data will be saved and you will proceed to the next image.</li>`
+            },
+            name_label: { ja: "お名前を入力してください:", en: "Please enter your name:" },
+            name_placeholder: { ja: "例：山田太郎", en: "e.g., John Smith" },
+            start_button: { ja: "練習を開始する", en: "Start Practice" },
+            mapping_button: { ja: "マッピング", en: "Mapping" },
+            back_to_selection: { ja: "状態の選択に戻る", en: "Back to Selection" },
+            undo_button: { ja: "一つ前に戻る", en: "Undo" },
+            modal_title: { ja: "リスクを選択してください (複数選択可)", en: "Select risks (multiple selections allowed)" },
+            no_risk_option: { ja: "リスクはない", en: "No risk" },
+            start_drawing_button: { ja: "描画を開始", en: "Start Drawing" },
+            download_button: { ja: "CSVをダウンロード", en: "Download CSV" },
+            end_title: { ja: "実験完了", en: "Experiment Complete" },
+            end_message: { ja: "ご協力ありがとうございました。下のボタンから結果をダウンロードしてください。", en: "Thank you for your participation. Please download the results using the button below." },
+            session_practice: { ja: "練習セッション", en: "Practice Session" },
+            session_main: { ja: "本番セッション", en: "Main Session" },
+            progress: { ja: (c, t) => `画像 ${c} / ${t}`, en: (c, t) => `Image ${c} / ${t}` },
+            instruction_draw: { ja: (risk) => `【${risk}】のリスク箇所を囲んでください`, en: (risk) => `Please draw around the area for [${risk}] risk` },
+            alert_practice_end: { ja: "練習はこれで終わりです。次に本番のセッションを開始します。", en: "The practice session is now complete. The main session will begin next." },
+            confirm_title: { ja: "確認", en: "Confirmation" },
+            confirm_message: { ja: "この描画で確定しますか？", en: "Are you sure you want to confirm this drawing?" },
+            confirm_yes: { ja: "はい", en: "Yes" },
+            confirm_no: { ja: "いいえ", en: "No" },
+            status_saving: { ja: "データを保存中...", en: "Saving data..." },
+            status_save_complete: { ja: "保存完了。次の画像に進みます。", en: "Save complete. Proceeding to next image." },
+            status_practice_complete: { ja: "練習完了。次の画像に進みます。", en: "Practice complete. Proceeding to the next image." }
         };
-        mappingBtn.disabled = false;
-        undoBtn.style.display = 'none';
-        
-        // 確認ダイアログが表示されている場合は閉じる
-        confirmDialog.style.display = 'none';
-        pendingRect = null;
-        
-        instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
-    }
-    function startDrawingForCurrentState() {
-        if (currentStateIndex >= selectedStates.length) { finishMapping(); return; }
-        const currentState = selectedStates[currentStateIndex];
-        instruction.textContent = translations.instruction_draw[currentLang](currentState);
-        canvas.addEventListener('mousedown', onMouseDown);
-        canvas.addEventListener('mousemove', onMouseMove);
-        canvas.addEventListener('mouseup', onMouseUp);
-    }
 
-    undoBtn.addEventListener('click', () => {
-        if (currentStateIndex === 0) return;
-        currentStateIndex--; const lastState = selectedStates[currentStateIndex];
-        delete annotations[lastState]; drawnRects.pop(); redrawCanvas();
-        instruction.textContent = translations.instruction_draw[currentLang](lastState);
-    });
+        let currentLang = 'ja';
+        let participantName = '';
 
-    // 確認ダイアログのイベントハンドラー
-    confirmYes.addEventListener('click', () => {
-        if (pendingRect) {
-            // 四角形を確定
-            annotations[pendingRect.state] = pendingRect.rect;
-            drawnRects.push(pendingRect.rect);
-            currentStateIndex++;
-            
-            // ダイアログを閉じる
+        // --- 言語切替機能 ---
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.dataset.translate;
+                if (translations[key] && translations[key][lang]) {
+                    el.innerHTML = translations[key][lang];
+                }
+            });
+
+            // Handle placeholder translations
+            document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+                const key = el.dataset.translatePlaceholder;
+                if (translations[key] && translations[key][lang]) {
+                    el.placeholder = translations[key][lang];
+                }
+            });
+
+            document.getElementById('lang-ja').classList.toggle('active', lang === 'ja');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+
+            // Update risk explanation list
+            buildRiskExplanationList();
+
+            // Update dynamic content
+            updateRiskPanelLanguage();
+            updateProgressInfo();
+        }
+
+        function buildRiskExplanationList() {
+            const container = document.getElementById('risk-explanation-list');
+            if (!container) return;
+
+            container.innerHTML = '';
+            riskCategories.forEach(cat => {
+                const item = document.createElement('div');
+                item.className = 'risk-explanation-item';
+                item.innerHTML = `
+                    <strong>${translations[cat.key][currentLang]}</strong>
+                    <span>${translations[cat.descKey][currentLang]}</span>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function updateRiskPanelLanguage() {
+            riskCategories.forEach(cat => {
+                const labelEl = document.querySelector(`[data-risk-id="${cat.id}"] .risk-label-text`);
+                if (labelEl) {
+                    labelEl.textContent = translations[cat.key][currentLang];
+                }
+                const tooltipEl = document.querySelector(`[data-risk-id="${cat.id}"] .tooltip`);
+                if (tooltipEl) {
+                    tooltipEl.textContent = translations[cat.descKey][currentLang];
+                }
+            });
+        }
+
+        function updateProgressInfo() {
+            if (progressInfo && currentImageList.length > 0) {
+                progressInfo.textContent = translations.progress[currentLang](currentImageIndex + 1, currentImageList.length);
+            }
+        }
+
+        document.getElementById('lang-ja').addEventListener('click', () => setLanguage('ja'));
+        document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+
+        // --- 要素取得と変数定義 ---
+        const startScreen = document.getElementById('start-screen');
+        const experimentScreen = document.getElementById('experiment-screen');
+        const endScreen = document.getElementById('end-screen');
+        const startExperimentBtn = document.getElementById('start-experiment-btn');
+        const sessionTitle = document.getElementById('session-title');
+        const progressInfo = document.getElementById('progress-info');
+        const mainImage = document.getElementById('mainImage');
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        const riskAssessmentPanel = document.getElementById('riskAssessmentPanel');
+        const riskCheckboxList = document.getElementById('riskCheckboxList');
+        const mappingBtn = document.getElementById('mappingBtn');
+        const undoBtn = document.getElementById('undoBtn');
+        const startDrawingBtn = document.getElementById('startDrawingBtn');
+        const closeSelectionPanelBtn = document.getElementById('closeSelectionPanelBtn');
+        const noRiskCheckbox = document.getElementById('noRiskCheckbox');
+        const instruction = document.getElementById('instruction');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const participantNameInput = document.getElementById('participantName');
+        const confirmDialog = document.getElementById('confirmDialog');
+        const confirmYes = document.getElementById('confirmYes');
+        const confirmNo = document.getElementById('confirmNo');
+
+        let practiceImageList = [];
+        let mainImageList = [];
+        let currentImageList = [];
+        let currentImageIndex = 0;
+        let isPractice = true;
+        let selectedRisks = [];
+        let currentRiskIndex = 0;
+        let annotations = {};
+        let drawnPaths = [];
+        let allResults = [];
+        let isDrawing = false;
+        let isDrawingMode = false;
+        let currentPath = [];
+        let pendingPath = null;
+
+        // --- 名前入力の監視 ---
+        participantNameInput.addEventListener('input', () => {
+            startExperimentBtn.disabled = participantNameInput.value.trim() === '';
+        });
+
+        // --- 実験フロー ---
+        startExperimentBtn.addEventListener('click', () => {
+            participantName = participantNameInput.value.trim();
+            if (!participantName) {
+                alert(currentLang === 'ja' ? '名前を入力してください' : 'Please enter your name');
+                return;
+            }
+
+            // 画像リストを構築
+            practiceImageList = [...practiceImages];
+            const nyuImages = generateNyuImages();
+            mainImageList = [...kitchenImages, ...livinglabImages, ...nyuImages];
+
+            startScreen.style.display = 'none';
+            experimentScreen.style.display = 'flex';
+            startSession(true);
+        });
+
+        function startSession(isPracticeSession) {
+            isPractice = isPracticeSession;
+            currentImageIndex = 0;
+
+            if (isPractice) {
+                sessionTitle.textContent = translations.session_practice[currentLang];
+                currentImageList = practiceImageList;
+            } else {
+                sessionTitle.textContent = translations.session_main[currentLang];
+                currentImageList = mainImageList;
+            }
+
+            loadImage();
+        }
+
+        function loadImage() {
+            if (currentImageIndex >= currentImageList.length) {
+                if (isPractice) {
+                    alert(translations.alert_practice_end[currentLang]);
+                    startSession(false);
+                } else {
+                    showEndScreen();
+                }
+                return;
+            }
+
+            // Reset state
+            selectedRisks = [];
+            currentRiskIndex = 0;
+            annotations = {};
+            drawnPaths = [];
+            pendingPath = null;
+
+            const imagePath = currentImageList[currentImageIndex];
+            mainImage.crossOrigin = "Anonymous";
+            mainImage.src = imagePath;
+            mainImage.onload = () => {
+                const container = document.querySelector('.image-container');
+                canvas.width = mainImage.naturalWidth;
+                canvas.height = mainImage.naturalHeight;
+            };
+
+            updateProgressInfo();
+            buildRiskPanel();
+
+            mappingBtn.disabled = false;
+            mappingBtn.setAttribute('data-translate', 'mapping_button');
+            setLanguage(currentLang);
+
+            undoBtn.style.display = 'none';
+            riskAssessmentPanel.classList.remove('visible');
+            instruction.textContent = translations.progress[currentLang](currentImageIndex + 1, currentImageList.length);
+            canvas.style.display = 'none';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            isDrawingMode = false;
+        }
+
+        function buildRiskPanel() {
+            riskCheckboxList.innerHTML = '';
+
+            riskCategories.forEach(cat => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'risk-question';
+                questionDiv.setAttribute('data-risk-id', cat.id);
+
+                const label = document.createElement('label');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'risk-checkbox';
+                checkbox.id = `risk-${cat.id}`;
+                checkbox.value = cat.id;
+                checkbox.addEventListener('change', updateStartDrawingButtonState);
+
+                const labelText = document.createElement('span');
+                labelText.className = 'risk-label-text';
+                labelText.textContent = translations[cat.key][currentLang];
+
+                label.appendChild(checkbox);
+                label.appendChild(labelText);
+
+                // Info icon with tooltip
+                const infoIcon = document.createElement('span');
+                infoIcon.className = 'info-icon';
+                infoIcon.textContent = '!';
+
+                const tooltip = document.createElement('span');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = translations[cat.descKey][currentLang];
+                infoIcon.appendChild(tooltip);
+
+                questionDiv.appendChild(label);
+                questionDiv.appendChild(infoIcon);
+
+                riskCheckboxList.appendChild(questionDiv);
+            });
+
+            // Reset no risk checkbox
+            noRiskCheckbox.checked = false;
+            noRiskCheckbox.addEventListener('change', onNoRiskChange);
+
+            updateStartDrawingButtonState();
+        }
+
+        function onNoRiskChange() {
+            if (noRiskCheckbox.checked) {
+                // Uncheck all risk checkboxes
+                document.querySelectorAll('#riskCheckboxList .risk-checkbox').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.risk-question').classList.remove('selected');
+                });
+            }
+            updateStartDrawingButtonState();
+        }
+
+        function updateStartDrawingButtonState() {
+            const checkedRisks = document.querySelectorAll('#riskCheckboxList .risk-checkbox:checked');
+
+            // If any risk is checked, uncheck "no risk"
+            if (checkedRisks.length > 0) {
+                noRiskCheckbox.checked = false;
+            }
+
+            // Update visual styling
+            document.querySelectorAll('#riskCheckboxList .risk-question').forEach(q => {
+                const cb = q.querySelector('.risk-checkbox');
+                q.classList.toggle('selected', cb.checked);
+            });
+
+            // Enable start drawing if at least one risk is checked OR "no risk" is checked
+            const hasSelection = checkedRisks.length > 0 || noRiskCheckbox.checked;
+            startDrawingBtn.disabled = !hasSelection;
+        }
+
+        // --- Mapping button ---
+        mappingBtn.addEventListener('click', () => {
+            if (isDrawingMode) {
+                // Return to selection from drawing mode
+                canvas.style.display = 'none';
+                riskAssessmentPanel.classList.add('visible');
+                isDrawingMode = false;
+
+                mappingBtn.setAttribute('data-translate', 'mapping_button');
+                setLanguage(currentLang);
+
+                undoBtn.style.display = 'none';
+                instruction.textContent = translations.progress[currentLang](currentImageIndex + 1, currentImageList.length);
+
+                // Reset drawings
+                drawnPaths = [];
+                currentRiskIndex = 0;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                annotations = {};
+
+                return;
+            }
+
+            // Show selection panel
+            riskAssessmentPanel.classList.add('visible');
+            mappingBtn.disabled = true;
+            updateStartDrawingButtonState();
+            riskAssessmentPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        closeSelectionPanelBtn.addEventListener('click', () => {
+            riskAssessmentPanel.classList.remove('visible');
+            mappingBtn.disabled = false;
+
+            // Reset checkboxes
+            document.querySelectorAll('#riskCheckboxList .risk-checkbox').forEach(cb => {
+                cb.checked = false;
+                cb.closest('.risk-question').classList.remove('selected');
+            });
+            noRiskCheckbox.checked = false;
+            updateStartDrawingButtonState();
+        });
+
+        // --- Start Drawing ---
+        startDrawingBtn.addEventListener('click', () => {
+            if (startDrawingBtn.disabled) return;
+
+            riskAssessmentPanel.classList.remove('visible');
+
+            // Check if "no risk" is selected
+            if (noRiskCheckbox.checked) {
+                // No drawing needed, proceed to next image
+                finishMapping();
+                return;
+            }
+
+            // Get selected risks
+            selectedRisks = Array.from(document.querySelectorAll('#riskCheckboxList .risk-checkbox:checked'))
+                .map(cb => cb.value);
+
+            if (selectedRisks.length === 0) return;
+
+            currentRiskIndex = 0;
+            drawnPaths = [];
+            annotations = {};
+
+            // Change button text
+            mappingBtn.setAttribute('data-translate', 'back_to_selection');
+            setLanguage(currentLang);
+
+            canvas.style.display = 'block';
+            undoBtn.style.display = 'block';
+            undoBtn.disabled = false;
+            isDrawingMode = true;
+            mappingBtn.disabled = false;
+
+            startDrawingForCurrentRisk();
+        });
+
+        function startDrawingForCurrentRisk() {
+            if (currentRiskIndex >= selectedRisks.length) {
+                finishMapping();
+                return;
+            }
+
+            const currentRiskId = selectedRisks[currentRiskIndex];
+            const riskCat = riskCategories.find(c => c.id === currentRiskId);
+            const riskName = translations[riskCat.key][currentLang];
+
+            instruction.textContent = translations.instruction_draw[currentLang](riskName);
+
+            // Set up canvas events
+            canvas.onmousedown = onMouseDown;
+            canvas.onmousemove = onMouseMove;
+            canvas.onmouseup = onMouseUp;
+            canvas.ontouchstart = onTouchStart;
+            canvas.ontouchmove = onTouchMove;
+            canvas.ontouchend = onTouchEnd;
+        }
+
+        function onMouseDown(e) {
+            isDrawing = true;
+            currentPath = [];
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+            currentPath.push({ x, y });
+        }
+
+        function onMouseMove(e) {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+            currentPath.push({ x, y });
+
+            redrawCanvas();
+            drawCurrentPath();
+        }
+
+        function onMouseUp(e) {
+            if (!isDrawing) return;
+            isDrawing = false;
+
+            // Check if path is too small
+            if (currentPath.length < 10) {
+                currentPath = [];
+                redrawCanvas();
+                return;
+            }
+
+            // Check if the path forms a closed shape
+            const startPoint = currentPath[0];
+            const endPoint = currentPath[currentPath.length - 1];
+            const distance = Math.sqrt(
+                Math.pow(endPoint.x - startPoint.x, 2) +
+                Math.pow(endPoint.y - startPoint.y, 2)
+            );
+
+            // Calculate the path's bounding box to determine appropriate closing threshold
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            currentPath.forEach(p => {
+                minX = Math.min(minX, p.x);
+                maxX = Math.max(maxX, p.x);
+                minY = Math.min(minY, p.y);
+                maxY = Math.max(maxY, p.y);
+            });
+            const pathSize = Math.max(maxX - minX, maxY - minY);
+
+            // Threshold: 20% of the path size, but at least 30px and at most 100px
+            const closeThreshold = Math.max(30, Math.min(100, pathSize * 0.2));
+            // Auto-close threshold: 40% of path size
+            const autoCloseThreshold = Math.max(50, Math.min(150, pathSize * 0.4));
+
+            if (distance <= closeThreshold) {
+                // Path is closed or very close - auto-close it
+                currentPath.push({ x: startPoint.x, y: startPoint.y });
+            } else if (distance <= autoCloseThreshold) {
+                // Almost closed - smoothly connect to start
+                // Add intermediate points for smoother closing
+                const steps = 5;
+                for (let i = 1; i <= steps; i++) {
+                    const t = i / steps;
+                    currentPath.push({
+                        x: endPoint.x + (startPoint.x - endPoint.x) * t,
+                        y: endPoint.y + (startPoint.y - endPoint.y) * t
+                    });
+                }
+            } else {
+                // Path is NOT closed - reject the drawing
+                const warningMsg = currentLang === 'ja'
+                    ? '囲みが閉じていません。始点と終点を近づけて描画してください。'
+                    : 'The shape is not closed. Please draw so the start and end points are close together.';
+                instruction.textContent = warningMsg;
+                instruction.style.color = 'red';
+
+                // Clear the invalid path after brief display
+                setTimeout(() => {
+                    currentPath = [];
+                    redrawCanvas();
+
+                    // Reset instruction
+                    const currentRiskId = selectedRisks[currentRiskIndex];
+                    const riskCat = riskCategories.find(c => c.id === currentRiskId);
+                    const riskName = translations[riskCat.key][currentLang];
+                    instruction.textContent = translations.instruction_draw[currentLang](riskName);
+                    instruction.style.color = '';
+                }, 1500);
+
+                return;
+            }
+
+            // Redraw with closed path
+            redrawCanvas();
+            drawCurrentPath();
+
+            // Store pending path and show confirmation dialog
+            pendingPath = {
+                path: [...currentPath],
+                riskId: selectedRisks[currentRiskIndex]
+            };
+
+            // Show confirmation dialog
+            confirmDialog.style.display = 'flex';
+            mappingBtn.disabled = true;
+            undoBtn.disabled = true;
+        }
+
+        function drawCurrentPath() {
+            if (currentPath.length < 2) return;
+
+            ctx.beginPath();
+            ctx.moveTo(currentPath[0].x, currentPath[0].y);
+            for (let i = 1; i < currentPath.length; i++) {
+                ctx.lineTo(currentPath[i].x, currentPath[i].y);
+            }
+            ctx.strokeStyle = '#ff4444';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
+        // Touch events
+        function onTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            onMouseDown({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+
+        function onTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            onMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+
+        function onTouchEnd(e) {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            onMouseUp({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+
+        function redrawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw all completed paths
+            drawnPaths.forEach(drawing => {
+                if (drawing.path.length < 2) return;
+
+                ctx.beginPath();
+                ctx.moveTo(drawing.path[0].x, drawing.path[0].y);
+                for (let i = 1; i < drawing.path.length; i++) {
+                    ctx.lineTo(drawing.path[i].x, drawing.path[i].y);
+                }
+                ctx.closePath();
+                ctx.strokeStyle = '#ff4444';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                ctx.fillStyle = 'rgba(255, 68, 68, 0.15)';
+                ctx.fill();
+            });
+        }
+
+        // Confirmation dialog handlers
+        confirmYes.addEventListener('click', () => {
+            if (pendingPath) {
+                // Confirm the drawing
+                annotations[pendingPath.riskId] = pendingPath.path;
+                drawnPaths.push(pendingPath);
+                currentRiskIndex++;
+
+                confirmDialog.style.display = 'none';
+                pendingPath = null;
+                currentPath = [];
+
+                mappingBtn.disabled = false;
+                undoBtn.disabled = false;
+
+                // Proceed to next risk
+                startDrawingForCurrentRisk();
+            }
+        });
+
+        confirmNo.addEventListener('click', () => {
+            // Discard the drawing
             confirmDialog.style.display = 'none';
-            pendingRect = null;
-            
-            // ボタンを再有効化
+            pendingPath = null;
+            currentPath = [];
+
             mappingBtn.disabled = false;
             undoBtn.disabled = false;
-            
-            // 次の状態の描画を開始
-            startDrawingForCurrentState();
-        }
-    });
 
-    confirmNo.addEventListener('click', () => {
-        // 四角形を破棄
-        confirmDialog.style.display = 'none';
-        pendingRect = null;
-        
-        // ボタンを再有効化
-        mappingBtn.disabled = false;
-        undoBtn.disabled = false;
-        
-        // キャンバスをクリアして既存の四角形のみ再描画
-        redrawCanvas();
-        
-        // 現在の状態の描画を再開（同じ状態をもう一度描画）
-        instruction.textContent = translations.instruction_draw[currentLang](selectedStates[currentStateIndex]);
-    });
-    function finishMapping() {
-        instruction.textContent = translations.status_saving[currentLang];
-        canvas.removeEventListener('mousedown', onMouseDown);
-        canvas.removeEventListener('mousemove', onMouseMove);
-        canvas.removeEventListener('mouseup', onMouseUp);
-        
-        // ボタンテキストを「マッピング」に戻す
-        mappingBtn.setAttribute('data-translate', 'mapping_button');
-        setLanguage(currentLang); // 翻訳を更新
-        
-        // 戻るボタンを非表示にする
-        undoBtn.style.display = 'none';
-        isDrawingMode = false; // フラグをリセット
-        
-        // 全てのボタンを無効化（次の画像遷移まで）
-        mappingBtn.disabled = true;
-        undoBtn.disabled = true;
-        
-        if (isPractice) {
-            console.log("Practice data:", { imageName: currentImageList[currentImageIndex], annotations: annotations });
-            instruction.textContent = translations.status_practice_complete[currentLang];
+            // Redraw existing paths only
+            redrawCanvas();
+
+            // Stay on current risk
+            const currentRiskId = selectedRisks[currentRiskIndex];
+            const riskCat = riskCategories.find(c => c.id === currentRiskId);
+            const riskName = translations[riskCat.key][currentLang];
+            instruction.textContent = translations.instruction_draw[currentLang](riskName);
+        });
+
+        // Undo button - go back to previous risk category
+        undoBtn.addEventListener('click', () => {
+            if (currentRiskIndex === 0) return;
+
+            currentRiskIndex--;
+            const lastRiskId = selectedRisks[currentRiskIndex];
+
+            delete annotations[lastRiskId];
+            drawnPaths.pop();
+            redrawCanvas();
+
+            const riskCat = riskCategories.find(c => c.id === lastRiskId);
+            const riskName = translations[riskCat.key][currentLang];
+            instruction.textContent = translations.instruction_draw[currentLang](riskName);
+        });
+
+        function finishMapping() {
+            instruction.textContent = translations.status_saving[currentLang];
+
+            canvas.onmousedown = null;
+            canvas.onmousemove = null;
+            canvas.onmouseup = null;
+
+            mappingBtn.setAttribute('data-translate', 'mapping_button');
+            setLanguage(currentLang);
+
+            undoBtn.style.display = 'none';
+            isDrawingMode = false;
+
+            mappingBtn.disabled = true;
+            undoBtn.disabled = true;
+
+            if (isPractice) {
+                console.log("Practice data:", {
+                    imageName: currentImageList[currentImageIndex],
+                    annotations: annotations,
+                    noRisk: noRiskCheckbox.checked
+                });
+                instruction.textContent = translations.status_practice_complete[currentLang];
+                resetForNextImage(1500);
+            } else {
+                saveResult();
+            }
+        }
+
+        function saveResult() {
+            // Build result object
+            const result = {
+                participantName: participantName,
+                imagePath: currentImageList[currentImageIndex],
+                noRisk: selectedRisks.length === 0,
+                risks: {}
+            };
+
+            riskCategories.forEach(cat => {
+                result.risks[cat.id] = {
+                    selected: selectedRisks.includes(cat.id),
+                    path: annotations[cat.id] || []
+                };
+            });
+
+            allResults.push(result);
+
+            instruction.textContent = translations.status_save_complete[currentLang];
             resetForNextImage(1500);
-        } else { saveDataToServer(); }
-    }
-    function saveDataToServer() {
-        if (!a_gas_url || a_gas_url.includes('貼り付け')) {
-            console.error("GAS URL is not set.");
-            instruction.textContent = "Error: Submission URL is not configured.";
-            resetForNextImage(2000); return;
         }
-        const dataToSend = { imageName: currentImageList[currentImageIndex], annotations: annotations, imageDataUrl: getAnnotatedImageDataUrl() };
-        fetch(a_gas_url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSend)})
-        .then(() => { instruction.textContent = translations.status_save_complete[currentLang]; })
-        .catch(error => { console.error('Data submission failed:', error); instruction.textContent = translations.status_save_error[currentLang]; })
-        .finally(() => { resetForNextImage(2000); });
-    }
-    function redrawCanvas() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.strokeStyle = 'red'; ctx.lineWidth = 3;
-        drawnRects.forEach(rect => { ctx.strokeRect(rect.x, rect.y, rect.width, rect.height); });
-    }
-    function onMouseDown(e) {
-        isDrawing = true; const rect = canvas.getBoundingClientRect();
-        startX = (e.clientX - rect.left) * (canvas.width / rect.width);
-        startY = (e.clientY - rect.top) * (canvas.height / rect.height);
-    }
-    function onMouseMove(e) {
-        if (!isDrawing) return; const rect = canvas.getBoundingClientRect();
-        const currentX = (e.clientX - rect.left) * (canvas.width / rect.width);
-        const currentY = (e.clientY - rect.top) * (canvas.height / rect.height);
-        redrawCanvas(); ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
-    }
-    function onMouseUp(e) {
-        if (!isDrawing) return; 
-        isDrawing = false; 
-        const rect = canvas.getBoundingClientRect();
-        const endX = (e.clientX - rect.left) * (canvas.width / rect.width);
-        const endY = (e.clientY - rect.top) * (canvas.height / rect.height);
-        const newRect = { x: Math.min(startX, endX), y: Math.min(startY, endY), width: Math.abs(endX - startX), height: Math.abs(endY - startY) };
-        
-        // 四角形が小さすぎる場合は無視
-        if (newRect.width < 5 || newRect.height < 5) {
-            return;
-        }
-        
-        // 確認ダイアログを表示する前に、一時的に四角形を保存
-        pendingRect = { rect: newRect, state: selectedStates[currentStateIndex] };
-        
-        // 確認ダイアログを表示
-        confirmDialog.style.display = 'flex';
-        
-        // 確認ダイアログ表示中はボタンを無効化
-        mappingBtn.disabled = true;
-        undoBtn.disabled = true;
-    }
-    function getAnnotatedImageDataUrl() {
-        const tempCanvas = document.createElement('canvas'); tempCanvas.width = mainImage.naturalWidth; tempCanvas.height = mainImage.naturalHeight;
-        const tempCtx = tempCanvas.getContext('2d'); tempCtx.drawImage(mainImage, 0, 0);
-        tempCtx.strokeStyle = 'lime'; tempCtx.lineWidth = 5;
-        Object.values(annotations).forEach(rect => { tempCtx.strokeRect(rect.x, rect.y, rect.width, rect.height); });
-        return tempCanvas.toDataURL('image/png');
-    }
 
+        function resetForNextImage(delay) {
+            setTimeout(() => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                canvas.style.display = 'none';
+                riskAssessmentPanel.classList.remove('visible');
+
+                // Reset checkboxes
+                document.querySelectorAll('#riskCheckboxList .risk-checkbox').forEach(cb => {
+                    cb.checked = false;
+                    cb.closest('.risk-question').classList.remove('selected');
+                });
+                noRiskCheckbox.checked = false;
+
+                currentImageIndex++;
+                loadImage();
+            }, delay);
+        }
+
+        function showEndScreen() {
+            experimentScreen.style.display = 'none';
+            endScreen.style.display = 'flex';
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            downloadCSV();
+        });
+
+        function downloadCSV() {
+            // CSV Header
+            let csv = 'participant_name,image_path,no_risk,fire_selected,burn_selected,ingestion_selected,fall_selected,damage_selected,cut_selected,fire_path,burn_path,ingestion_path,fall_path,damage_path,cut_path\n';
+
+            allResults.forEach(result => {
+                const row = [
+                    result.participantName,
+                    result.imagePath,
+                    result.noRisk ? 1 : 0,
+                    result.risks.fire.selected ? 1 : 0,
+                    result.risks.burn.selected ? 1 : 0,
+                    result.risks.ingestion.selected ? 1 : 0,
+                    result.risks.fall.selected ? 1 : 0,
+                    result.risks.damage.selected ? 1 : 0,
+                    result.risks.cut.selected ? 1 : 0,
+                    JSON.stringify(result.risks.fire.path),
+                    JSON.stringify(result.risks.burn.path),
+                    JSON.stringify(result.risks.ingestion.path),
+                    JSON.stringify(result.risks.fall.path),
+                    JSON.stringify(result.risks.damage.path),
+                    JSON.stringify(result.risks.cut.path)
+                ];
+                csv += row.map(v => `"${v}"`).join(',') + '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `risk_assessment_${participantName}_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // --- 初期化 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage('ja');
+        });
     </script>
 </body>
+
 </html>

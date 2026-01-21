@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Feedback Experiment / 画像フィードバック実験</title>
+    <style>
+        /* CSS (デザイン) */
+        body {
+            font-family: sans-serif; display: flex;
+            justify-content: center; align-items: center;
+            flex-direction: column; min-height: 100vh;
+            margin: 0; padding: 20px 0; background-color: #f0f0f0;
+        }
+        .lang-switcher {
+            position: absolute; top: 15px; right: 20px;
+        }
+        .lang-switcher button {
+            background: none; border: none; cursor: pointer;
+            font-size: 1em; color: #007bff; padding: 5px;
+            text-decoration: underline;
+        }
+        #start-screen {
+            max-width: 800px; padding: 40px; background-color: white;
+            border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+        #start-screen h1 { text-align: center; }
+        #start-screen ul, #start-screen ol { padding-left: 20px; }
+        #start-experiment-btn {
+            display: block; width: 60%; margin: 30px auto 0;
+            padding: 15px; font-size: 1.2em; cursor: pointer;
+            background-color: #007bff; color: white; border: none;
+            border-radius: 5px;
+        }
+        #experiment-screen {
+            display: none; flex-direction: column; align-items: center;
+        }
+        .image-container {
+            position: relative; width: 800px; height: 600px;
+            border: 1px solid #ccc; background-color: #fff;
+        }
+        #mainImage { width: 100%; height: 100%; object-fit: contain; }
+        canvas {
+            position: absolute; top: 0; left: 0; width: 100%;
+            height: 100%; cursor: crosshair; display: none;
+        }
+        .controls {
+            display: flex; align-items: center; gap: 15px; margin-top: 10px;
+        }
+        .btn {
+            font-size: 1.1em; padding: 8px 20px; cursor: pointer;
+            color: white; border: none; border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        #mappingBtn { background-color: #007bff; }
+        #undoBtn { background-color: #ffc107; color: black; }
+        .btn {
+            background-color: #007bff;
+        }
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+            color: #666;
+            transform: none;
+            box-shadow: none;
+        }
+        /* --- ▼▼▼ UI改善のためのCSS変更箇所 ▼▼▼ --- */
+        #stateSelectionPanel {
+            display: none; /* 最初は非表示 */
+            flex-direction: column;
+            align-items: center;
+            width: 800px;
+            margin-top: 15px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.8em;
+            line-height: 1;
+            color: #888;
+            cursor: pointer;
+            padding: 0;
+        }
+        .close-btn:hover {
+            color: #333;
+        }
+
+        
+        #stateSelectionPanel.visible {
+            display: flex; /* 表示する時はflexに */
+        }
+        .state-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3列で表示 */
+            gap: 10px 20px; /* 縦横の間隔 */
+            width: 100%;
+            margin: 15px 0;
+        }
+        #startDrawingBtn {
+            margin-top: 10px;
+        }
+        /* --- ▲▲▲ UI改善のためのCSS変更箇所 ▲▲▲ --- */
+        #instruction {
+            margin-top: 10px; font-weight: bold;
+            color: #d9534f; height: 20px;
+        }
+        #undoBtn {
+            display: none; /* 初期状態で非表示 */
+        }
+        
+        /* 確認ダイアログのスタイル */
+        #confirmDialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .dialog-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .dialog-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .dialog-buttons .btn {
+            min-width: 80px;
+        }
+        
+        .dialog-buttons .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lang-switcher">
+        <button id="lang-ja">日本語</button> / <button id="lang-en">English</button>
+    </div>
+
+    <div id="start-screen">
+        <h1 data-translate="welcome_title"></h1>
+        <p data-translate="welcome_intro"></p>
+        <h3 data-translate="overview_title"></h3>
+        <ul data-translate="overview_list"></ul>
+        <h3 data-translate="how_to_title"></h3>
+        <ol data-translate="how_to_list"></ol>
+        <button id="start-experiment-btn" data-translate="start_button"></button>
+    </div>
+
+    <div id="experiment-screen">
+        <h2 id="session-title"></h2>
+        <div class="image-container">
+            <img id="mainImage" src="" alt="Experiment Image">
+            <canvas id="drawingCanvas"></canvas>
+        </div>
+        <div class="controls">
+            <button id="mappingBtn" class="btn" data-translate="mapping_button"></button>
+            <button id="undoBtn" class="btn" data-translate="undo_button" disabled></button>
+        </div>
+        <div id="instruction"></div>
+
+        <div id="stateSelectionPanel">
+            <button id="closeSelectionPanelBtn" class="close-btn">&times;</button>
+            <h3 data-translate="modal_title"></h3>
+            <div class="state-options">
+                <label><input type="checkbox" name="state" value="Clean"> <span data-translate="state_clean"></span></label>
+                <label><input type="checkbox" name="state" value="Scattered"> <span data-translate="state_scattered"></span></label>
+                <label><input type="checkbox" name="state" value="Broken"> <span data-translate="state_broken"></span></label>
+                <label><input type="checkbox" name="state" value="Wet"> <span data-translate="state_wet"></span></label>
+                <label><input type="checkbox" name="state" value="Risk"> <span data-translate="state_risk"></span></label>
+            </div>
+            <button id="startDrawingBtn" class="btn" data-translate="start_drawing_button" disabled></button>
+        </div>
+        
+        <!-- 確認ダイアログ -->
+        <div id="confirmDialog" style="display: none;">
+            <div class="dialog-content">
+                <h3 data-translate="confirm_title"></h3>
+                <p data-translate="confirm_message"></p>
+                <div class="dialog-buttons">
+                    <button id="confirmYes" class="btn" data-translate="confirm_yes"></button>
+                    <button id="confirmNo" class="btn" data-translate="confirm_no"></button>
+                </div>
+            </div>
+        </div>
+        </div>
+
+    <script>
+    // --- ★★★ 実験設定 ★★★ --- (変更なし)
+    const practiceImages = [ 'images/practice1.jpg', 'images/practice2.jpg', 'images/practice3.jpg', 'images/practice4.jpg' ];
+    const mainImages = ['images/livinglab_clutter.jpg', 'images/living_risk.jpg', 'images/kitchen_clutter_01.png', 'images/kitchen_clutter_02.png', 'images/kitchen_wet_01.png', 'images/kitchen_wet_02.png', 'images/student_space_risk_01.png', 'images/student_space_risk_02.png', 'images/student_space_risk_03.png', 'images/student_space_risk_04.png' ];
+    const a_gas_url = 'https://script.google.com/macros/s/AKfycbzO-eA9nXtnTD3jSLdvDiagWK2xQZ1wotjPWOTpOrFakRkZKrlP1sdv5aGeUWV4gCFRWg/exec';
+
+    // --- テキスト管理 --- (変更なし)
+    const translations = {
+        welcome_title: { ja: "フィードバック実験へようこそ", en: "Welcome to the Feedback Experiment" },
+        welcome_intro: { ja: "この実験にご協力いただき、ありがとうございます。以下の説明をよくお読みの上、ご参加ください。", en: "Thank you for participating in this experiment. Please read the instructions below carefully before you begin." },
+        overview_title: { ja: "実験の概要", en: "Experiment Overview" },
+        overview_list: {
+            ja: `<li>合計12枚（練習4枚、本番8枚）の画像を見て、特定の状態が感じられる箇所を四角形で囲っていただきます。</li><li>対象となる状態は <strong>{清潔, 散乱, 濡れ, 壊れている, リスクがある}</strong> の5つです。</li><li>1つの箇所に対して、複数の状態を定義することも可能です。（例：「濡れていてリスクがある」など）</li>`,
+            en: `<li>You will be shown a total of 12 images (4 for practice, 8 for the main task). For each image, you will draw rectangles around areas where you perceive certain states.</li><li>The states are: <strong>{Clean, Scattered, Wet, Broken, Risk}</strong>.</li><li>It is possible to define multiple states for the same area (e.g., an area can be both "Wet" and a "Risk").</li>`
+        },
+        how_to_title: { ja: "操作方法", en: "How to Operate" },
+        how_to_list: {
+            ja: `<li>「マッピング」ボタンを押し、画像から感じる状態を複数選択します。</li><li>「描画を開始」ボタンを押します。</li><li>指示に従い、該当する箇所をマウスでドラッグして四角で囲みます。</li><li>選択した全ての状態について描画が完了すると、データが自動で保存され、次の画像に進みます。</li>`,
+            en: `<li>Click the "Mapping" button and select one or more states you perceive in the image.</li><li>Click the "Start Drawing" button.</li><li>Follow the instructions to draw a rectangle by dragging your mouse over the corresponding area.</li><li>Once you have drawn areas for all selected states, the data will be saved automatically, and you will proceed to the next image.</li>`
+        },
+        start_button: { ja: "練習を開始する", en: "Start Practice" },
+        mapping_button: { ja: "マッピング", en: "Mapping" },
+        back_to_selection: { ja: "状態の選択に戻る", en: "Back to Selection" },
+        undo_button: { ja: "一つ前に戻る", en: "Undo" },
+        modal_title: { ja: "あなたの感じる状態を選択してください (複数選択可)", en: "Select the state(s) you perceive (multiple selections allowed)" },
+        state_clean: { ja: "清潔", en: "Clean" },
+        state_scattered: { ja: "散乱", en: "Scattered" },
+        state_broken: { ja: "壊れている", en: "Broken" },
+        state_wet: { ja: "濡れ", en: "Wet" },
+        state_risk: { ja: "リスクがある", en: "Risk" },
+        start_drawing_button: { ja: "描画を開始", en: "Start Drawing" },
+        session_practice: { ja: "練習セッション", en: "Practice Session" },
+        session_main: { ja: "本番セッション", en: "Main Session" },
+        instruction_image: { ja: (current, total) => `画像 ${current} / ${total}`, en: (current, total) => `Image ${current} / ${total}` },
+        instruction_draw: { ja: (state) => `【${state}】と感じる部分を四角で囲ってください。`, en: (state) => `Please draw a rectangle around the area you feel is [${state}].` },
+        alert_practice_end: { ja: "練習はこれで終わりです。次に本番のセッションを開始します。", en: "The practice session is now complete. The main session will begin next." },
+        alert_experiment_end: { ja: "全ての実験が終了しました。ご協力ありがとうございました。", en: "The experiment is now finished. Thank you for your cooperation." },
+        alert_select_state: { ja: "少なくとも1つの状態を選択してください。", en: "Please select at least one state." },
+        status_saving: { ja: "データを保存中...", en: "Saving data..." },
+        status_save_complete: { ja: "データの保存が完了しました。", en: "Save complete." },
+        status_save_error: { ja: "エラー：データの保存に失敗しました。", en: "Error: Failed to save data." },
+        status_practice_complete: { ja: "練習完了。次の画像に進みます。", en: "Practice complete. Proceeding to the next image." },
+        confirm_title: { ja: "確認", en: "Confirmation" },
+        confirm_message: { ja: "この四角形で確定しますか？", en: "Are you sure you want to confirm this rectangle?" },
+        confirm_yes: { ja: "はい", en: "Yes" },
+        confirm_no: { ja: "いいえ", en: "No" },
+    };
+    let currentLang = 'ja';
+
+    // --- 言語切替機能 --- (変更なし)
+    function setLanguage(lang) {
+        currentLang = lang; document.documentElement.lang = lang;
+        document.querySelectorAll('[data-translate]').forEach(el => {
+            const key = el.dataset.translate;
+            if (translations[key] && translations[key][lang]) { el.innerHTML = translations[key][lang]; }
+        });
+        document.querySelectorAll('.state-options input[type="checkbox"]').forEach(checkbox => {
+            const stateKey = `state_${checkbox.nextElementSibling.dataset.translate.split('_')[1]}`;
+            if (translations[stateKey]) { checkbox.value = translations[stateKey]['en']; }
+        });
+    }
+    document.getElementById('lang-ja').addEventListener('click', () => setLanguage('ja'));
+    document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+
+    // --- 要素取得と変数定義 ---
+    const startScreen = document.getElementById('start-screen');
+    const experimentScreen = document.getElementById('experiment-screen');
+    const startExperimentBtn = document.getElementById('start-experiment-btn');
+    const sessionTitle = document.getElementById('session-title');
+    const mainImage = document.getElementById('mainImage');
+    const mappingBtn = document.getElementById('mappingBtn');
+    const backToSelectionBtn = document.getElementById('backToSelectionBtn');
+    const undoBtn = document.getElementById('undoBtn');
+    const stateSelectionPanel = document.getElementById('stateSelectionPanel');
+    const closeSelectionPanelBtn = document.getElementById('closeSelectionPanelBtn');
+    const startDrawingBtn = document.getElementById('startDrawingBtn');
+    const canvas = document.getElementById('drawingCanvas');
+    const instruction = document.getElementById('instruction');
+    const ctx = canvas.getContext('2d');
+    const confirmDialog = document.getElementById('confirmDialog');
+    const confirmYes = document.getElementById('confirmYes');
+    const confirmNo = document.getElementById('confirmNo');
+    let currentImageList = [], currentImageIndex = 0, isPractice = true, selectedStates = [], currentStateIndex = 0, annotations = {}, drawnRects = [], isDrawing = false, startX, startY, isDrawingMode = false, pendingRect = null;
+    const checkboxes = document.querySelectorAll('.state-options input[type="checkbox"]');
+
+    // --- ▼▼▼ ボタン状態管理のロジック ▼▼▼ ---
+    function updateStartDrawingButtonState() {
+        const isAnyChecked = Array.from(checkboxes).some(cb => cb.checked);
+        startDrawingBtn.disabled = !isAnyChecked;
+    }
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateStartDrawingButtonState);
+    });
+    // --- ▲▲▲ ボタン状態管理のロジック ▲▲▲ ---
+
+    // --- 実験フロー ---
+    startExperimentBtn.addEventListener('click', () => {
+        startScreen.style.display = 'none';
+        experimentScreen.style.display = 'flex';
+        startSession(true);
+    });
+
+    mappingBtn.addEventListener('click', () => {
+        console.log('mappingBtn clicked, isDrawingMode:', isDrawingMode); // デバッグ用
+    
+    // 描画中の場合（canvas が表示されている場合）
+       // 描画中の場合
+       if (isDrawingMode) {
+        console.log('Drawing mode detected, stopping drawing'); // デバッグ用
+        // 描画を中断して状態選択に戻る
+        canvas.style.display = 'none';
+        stateSelectionPanel.classList.add('visible');
+        isDrawingMode = false; // フラグをリセット
+        
+        // ボタンテキストを「マッピング」に戻す
+        mappingBtn.setAttribute('data-translate', 'mapping_button');
+        setLanguage(currentLang);
+        
+        // 戻るボタンを非表示にする
+        undoBtn.style.display = 'none';
+        instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
+        
+        
+        // 描画状態をリセット
+        drawnRects = [];
+        currentStateIndex = 0;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        return;
+    }
+
+        console.log('Normal mapping process'); // デバッグ用
+
+        // 通常のマッピング処理
+        stateSelectionPanel.classList.add('visible');
+        mappingBtn.disabled = true;
+        updateStartDrawingButtonState();
+        stateSelectionPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    closeSelectionPanelBtn.addEventListener('click', () => {
+        stateSelectionPanel.classList.remove('visible');
+        mappingBtn.disabled = false;
+        document.querySelectorAll('input[name="state"]:checked').forEach(cb => cb.checked = false);
+        updateStartDrawingButtonState(); // パネルを閉じる時もボタンの状態をリセット
+    });
+
+    startDrawingBtn.addEventListener('click', () => {
+        console.log('startDrawingBtn clicked'); // デバッグ用
+    
+        if (startDrawingBtn.disabled) return;
+        
+        stateSelectionPanel.classList.remove('visible');
+        
+        // ボタンテキストを「状態の選択に戻る」に変更
+        mappingBtn.setAttribute('data-translate', 'back_to_selection');
+        setLanguage(currentLang);
+        
+        selectedStates = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+        currentStateIndex = 0;
+        drawnRects = [];
+        
+        canvas.style.display = 'block';
+        undoBtn.style.display = 'block';
+        undoBtn.disabled = false;
+        isDrawingMode = true; // フラグを設定
+        
+        // mappingBtn を有効にする（重要！）
+        mappingBtn.disabled = false;
+    
+        console.log('isDrawingMode set to:', isDrawingMode); // デバッグ用
+    
+        startDrawingForCurrentState();
+        });
+
+    function resetForNextImage(delay) {
+        setTimeout(() => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.style.display = 'none';
+            stateSelectionPanel.classList.remove('visible');
+            checkboxes.forEach(cb => cb.checked = false);
+            
+            currentImageIndex++;
+            loadImage();
+        }, delay);
+    }
+
+    // --- ページの初期化 ---
+    document.addEventListener('DOMContentLoaded', () => {
+        setLanguage('ja');
+    });
+
+    // --- ▼▼▼ 以下、変更不要な関数群 ▼▼▼ ---
+    function startSession(isPracticeSession) {
+        isPractice = isPracticeSession; currentImageIndex = 0;
+        if (isPractice) {
+            sessionTitle.textContent = translations.session_practice[currentLang]; currentImageList = practiceImages;
+        } else {
+            sessionTitle.textContent = translations.session_main[currentLang]; currentImageList = mainImages;
+        }
+        loadImage();
+    }
+    function loadImage() {
+        if (currentImageIndex >= currentImageList.length) {
+            if (isPractice) {
+                alert(translations.alert_practice_end[currentLang]); startSession(false);
+            } else {
+                experimentScreen.innerHTML = `<h1>${translations.alert_experiment_end[currentLang]}</h1>`;
+            }
+            return;
+        }
+        const imageName = currentImageList[currentImageIndex];
+        mainImage.crossOrigin = "Anonymous"; mainImage.src = imageName;
+        mainImage.onload = () => {
+            const container = document.querySelector('.image-container');
+            canvas.width = mainImage.naturalWidth; canvas.height = mainImage.naturalHeight;
+            container.style.width = mainImage.clientWidth + 'px'; container.style.height = mainImage.clientHeight + 'px';
+        };
+        mappingBtn.disabled = false;
+        undoBtn.style.display = 'none';
+        
+        // 確認ダイアログが表示されている場合は閉じる
+        confirmDialog.style.display = 'none';
+        pendingRect = null;
+        
+        instruction.textContent = translations.instruction_image[currentLang](currentImageIndex + 1, currentImageList.length);
+    }
+    function startDrawingForCurrentState() {
+        if (currentStateIndex >= selectedStates.length) { finishMapping(); return; }
+        const currentState = selectedStates[currentStateIndex];
+        instruction.textContent = translations.instruction_draw[currentLang](currentState);
+        canvas.addEventListener('mousedown', onMouseDown);
+        canvas.addEventListener('mousemove', onMouseMove);
+        canvas.addEventListener('mouseup', onMouseUp);
+    }
+
+    undoBtn.addEventListener('click', () => {
+        if (currentStateIndex === 0) return;
+        currentStateIndex--; const lastState = selectedStates[currentStateIndex];
+        delete annotations[lastState]; drawnRects.pop(); redrawCanvas();
+        instruction.textContent = translations.instruction_draw[currentLang](lastState);
+    });
+
+    // 確認ダイアログのイベントハンドラー
+    confirmYes.addEventListener('click', () => {
+        if (pendingRect) {
+            // 四角形を確定
+            annotations[pendingRect.state] = pendingRect.rect;
+            drawnRects.push(pendingRect.rect);
+            currentStateIndex++;
+            
+            // ダイアログを閉じる
+            confirmDialog.style.display = 'none';
+            pendingRect = null;
+            
+            // ボタンを再有効化
+            mappingBtn.disabled = false;
+            undoBtn.disabled = false;
+            
+            // 次の状態の描画を開始
+            startDrawingForCurrentState();
+        }
+    });
+
+    confirmNo.addEventListener('click', () => {
+        // 四角形を破棄
+        confirmDialog.style.display = 'none';
+        pendingRect = null;
+        
+        // ボタンを再有効化
+        mappingBtn.disabled = false;
+        undoBtn.disabled = false;
+        
+        // キャンバスをクリアして既存の四角形のみ再描画
+        redrawCanvas();
+        
+        // 現在の状態の描画を再開（同じ状態をもう一度描画）
+        instruction.textContent = translations.instruction_draw[currentLang](selectedStates[currentStateIndex]);
+    });
+    function finishMapping() {
+        instruction.textContent = translations.status_saving[currentLang];
+        canvas.removeEventListener('mousedown', onMouseDown);
+        canvas.removeEventListener('mousemove', onMouseMove);
+        canvas.removeEventListener('mouseup', onMouseUp);
+        
+        // ボタンテキストを「マッピング」に戻す
+        mappingBtn.setAttribute('data-translate', 'mapping_button');
+        setLanguage(currentLang); // 翻訳を更新
+        
+        // 戻るボタンを非表示にする
+        undoBtn.style.display = 'none';
+        isDrawingMode = false; // フラグをリセット
+        
+        // 全てのボタンを無効化（次の画像遷移まで）
+        mappingBtn.disabled = true;
+        undoBtn.disabled = true;
+        
+        if (isPractice) {
+            console.log("Practice data:", { imageName: currentImageList[currentImageIndex], annotations: annotations });
+            instruction.textContent = translations.status_practice_complete[currentLang];
+            resetForNextImage(1500);
+        } else { saveDataToServer(); }
+    }
+    function saveDataToServer() {
+        if (!a_gas_url || a_gas_url.includes('貼り付け')) {
+            console.error("GAS URL is not set.");
+            instruction.textContent = "Error: Submission URL is not configured.";
+            resetForNextImage(2000); return;
+        }
+        const dataToSend = { imageName: currentImageList[currentImageIndex], annotations: annotations, imageDataUrl: getAnnotatedImageDataUrl() };
+        fetch(a_gas_url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSend)})
+        .then(() => { instruction.textContent = translations.status_save_complete[currentLang]; })
+        .catch(error => { console.error('Data submission failed:', error); instruction.textContent = translations.status_save_error[currentLang]; })
+        .finally(() => { resetForNextImage(2000); });
+    }
+    function redrawCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.strokeStyle = 'red'; ctx.lineWidth = 3;
+        drawnRects.forEach(rect => { ctx.strokeRect(rect.x, rect.y, rect.width, rect.height); });
+    }
+    function onMouseDown(e) {
+        isDrawing = true; const rect = canvas.getBoundingClientRect();
+        startX = (e.clientX - rect.left) * (canvas.width / rect.width);
+        startY = (e.clientY - rect.top) * (canvas.height / rect.height);
+    }
+    function onMouseMove(e) {
+        if (!isDrawing) return; const rect = canvas.getBoundingClientRect();
+        const currentX = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const currentY = (e.clientY - rect.top) * (canvas.height / rect.height);
+        redrawCanvas(); ctx.strokeRect(startX, startY, currentX - startX, currentY - startY);
+    }
+    function onMouseUp(e) {
+        if (!isDrawing) return; 
+        isDrawing = false; 
+        const rect = canvas.getBoundingClientRect();
+        const endX = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const endY = (e.clientY - rect.top) * (canvas.height / rect.height);
+        const newRect = { x: Math.min(startX, endX), y: Math.min(startY, endY), width: Math.abs(endX - startX), height: Math.abs(endY - startY) };
+        
+        // 四角形が小さすぎる場合は無視
+        if (newRect.width < 5 || newRect.height < 5) {
+            return;
+        }
+        
+        // 確認ダイアログを表示する前に、一時的に四角形を保存
+        pendingRect = { rect: newRect, state: selectedStates[currentStateIndex] };
+        
+        // 確認ダイアログを表示
+        confirmDialog.style.display = 'flex';
+        
+        // 確認ダイアログ表示中はボタンを無効化
+        mappingBtn.disabled = true;
+        undoBtn.disabled = true;
+    }
+    function getAnnotatedImageDataUrl() {
+        const tempCanvas = document.createElement('canvas'); tempCanvas.width = mainImage.naturalWidth; tempCanvas.height = mainImage.naturalHeight;
+        const tempCtx = tempCanvas.getContext('2d'); tempCtx.drawImage(mainImage, 0, 0);
+        tempCtx.strokeStyle = 'lime'; tempCtx.lineWidth = 5;
+        Object.values(annotations).forEach(rect => { tempCtx.strokeRect(rect.x, rect.y, rect.width, rect.height); });
+        return tempCanvas.toDataURL('image/png');
+    }
+
+    </script>
+</body>
+</html>
