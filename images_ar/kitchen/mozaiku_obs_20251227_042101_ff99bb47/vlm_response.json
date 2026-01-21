@@ -1,0 +1,50 @@
+{
+  "raw_text": "```json\n{\n  \"detected_regions\": [\n    {\n      \"bbox_2d\": [\n        400,\n        34,\n        999,\n        794\n      ],\n      \"analysis\": {\n        \"category\": \"wet\",\n        \"score\": 0.95,\n        \"reason\": \"There is a visible puddle of liquid on the wooden table surface.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        438,\n        508,\n        642,\n        610\n      ],\n      \"analysis\": {\n        \"category\": \"about to fall\",\n        \"score\": 0.8,\n        \"reason\": \"The mug is lying on its side, having just fallen or been placed in a position that suggests a spill, which is a state of instability or having just completed a fall. While it is resting on its side, which is stable for that position, the context of the spill implies it was recently unstable and is now in a state resulting from a fall.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        500,\n        400,\n        580,\n        470\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.6,\n        \"reason\": \"Objects like a rice cooker, papers, and other items are piled up on the small shelf unit near the window, indicating a cluttered surface.\"\n      }\n    }\n  ]\n}\n```",
+  "parsed": {
+    "detected_regions": [
+      {
+        "bbox_2d": [
+          400,
+          34,
+          999,
+          794
+        ],
+        "analysis": {
+          "category": "wet",
+          "score": 0.95,
+          "reason": "There is a visible puddle of liquid on the wooden table surface."
+        }
+      },
+      {
+        "bbox_2d": [
+          438,
+          508,
+          642,
+          610
+        ],
+        "analysis": {
+          "category": "about to fall",
+          "score": 0.8,
+          "reason": "The mug is lying on its side, having just fallen or been placed in a position that suggests a spill, which is a state of instability or having just completed a fall. While it is resting on its side, which is stable for that position, the context of the spill implies it was recently unstable and is now in a state resulting from a fall."
+        }
+      },
+      {
+        "bbox_2d": [
+          500,
+          400,
+          580,
+          470
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.6,
+          "reason": "Objects like a rice cooker, papers, and other items are piled up on the small shelf unit near the window, indicating a cluttered surface."
+        }
+      }
+    ]
+  },
+  "model": "gemini-2.5-flash-preview-09-2025",
+  "topic_id": "cluster_0",
+  "timestamp": "2025-12-27T04:21:11",
+  "timestamp_ros": "1766776871.6855667"
+}

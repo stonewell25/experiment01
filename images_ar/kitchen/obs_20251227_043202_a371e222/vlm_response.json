@@ -1,0 +1,50 @@
+{
+  "raw_text": "```json\n{\n  \"detected_regions\": [\n    {\n      \"bbox_2d\": [\n        78,\n        0,\n        700,\n        210\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.85,\n        \"reason\": \"The metal dish rack is cluttered with various kitchen items, including mugs, tumblers, and dishes.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        467,\n        300,\n        617,\n        500\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.75,\n        \"reason\": \"The countertop area around the induction cooktop is cluttered with a pot, water filter pitcher, and another pitcher.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        700,\n        0,\n        968,\n        300\n      ],\n      \"analysis\": {\n        \"category\": \"stacked\",\n        \"score\": 0.95,\n        \"reason\": \"Two white bowls are clearly stacked on top of each other on the countertop.\"\n      }\n    }\n  ]\n}\n```",
+  "parsed": {
+    "detected_regions": [
+      {
+        "bbox_2d": [
+          78,
+          0,
+          700,
+          210
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.85,
+          "reason": "The metal dish rack is cluttered with various kitchen items, including mugs, tumblers, and dishes."
+        }
+      },
+      {
+        "bbox_2d": [
+          467,
+          300,
+          617,
+          500
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.75,
+          "reason": "The countertop area around the induction cooktop is cluttered with a pot, water filter pitcher, and another pitcher."
+        }
+      },
+      {
+        "bbox_2d": [
+          700,
+          0,
+          968,
+          300
+        ],
+        "analysis": {
+          "category": "stacked",
+          "score": 0.95,
+          "reason": "Two white bowls are clearly stacked on top of each other on the countertop."
+        }
+      }
+    ]
+  },
+  "model": "gemini-2.5-flash-preview-09-2025",
+  "topic_id": "cluster_0",
+  "timestamp": "2025-12-27T04:32:12",
+  "timestamp_ros": "1766777532.6031823"
+}

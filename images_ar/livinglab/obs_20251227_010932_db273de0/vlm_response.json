@@ -1,0 +1,76 @@
+{
+  "raw_text": "```json\n{\n  \"detected_regions\": [\n    {\n      \"bbox_2d\": [\n        389,\n        153,\n        433,\n        344\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.75,\n        \"reason\": \"Various small objects and miscellaneous items are piled up on the counter surface to the left of the sink unit.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        383,\n        790,\n        436,\n        999\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.8,\n        \"reason\": \"Various boxes and loose objects (like gloves) are piled up on the counter surface to the right of the sink unit.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        617,\n        345,\n        987,\n        485\n      ],\n      \"analysis\": {\n        \"category\": \"ajar\",\n        \"score\": 0.95,\n        \"reason\": \"The drawer/cabinet door on the left side of the sink unit is partially open (ajar).\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        617,\n        525,\n        987,\n        632\n      ],\n      \"analysis\": {\n        \"category\": \"ajar\",\n        \"score\": 0.95,\n        \"reason\": \"The cabinet door on the right side of the sink unit is fully open (ajar).\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        484,\n        807,\n        551,\n        930\n      ],\n      \"analysis\": {\n        \"category\": \"stacked\",\n        \"score\": 0.85,\n        \"reason\": \"Cardboard boxes are stacked on top of each other on the counter surface to the right.\"\n      }\n    }\n  ]\n}\n```",
+  "parsed": {
+    "detected_regions": [
+      {
+        "bbox_2d": [
+          389,
+          153,
+          433,
+          344
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.75,
+          "reason": "Various small objects and miscellaneous items are piled up on the counter surface to the left of the sink unit."
+        }
+      },
+      {
+        "bbox_2d": [
+          383,
+          790,
+          436,
+          999
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.8,
+          "reason": "Various boxes and loose objects (like gloves) are piled up on the counter surface to the right of the sink unit."
+        }
+      },
+      {
+        "bbox_2d": [
+          617,
+          345,
+          987,
+          485
+        ],
+        "analysis": {
+          "category": "ajar",
+          "score": 0.95,
+          "reason": "The drawer/cabinet door on the left side of the sink unit is partially open (ajar)."
+        }
+      },
+      {
+        "bbox_2d": [
+          617,
+          525,
+          987,
+          632
+        ],
+        "analysis": {
+          "category": "ajar",
+          "score": 0.95,
+          "reason": "The cabinet door on the right side of the sink unit is fully open (ajar)."
+        }
+      },
+      {
+        "bbox_2d": [
+          484,
+          807,
+          551,
+          930
+        ],
+        "analysis": {
+          "category": "stacked",
+          "score": 0.85,
+          "reason": "Cardboard boxes are stacked on top of each other on the counter surface to the right."
+        }
+      }
+    ]
+  },
+  "model": "gemini-2.5-flash-preview-09-2025",
+  "topic_id": "cluster_0",
+  "timestamp": "2025-12-27T01:09:42",
+  "timestamp_ros": "1766765382.187523"
+}

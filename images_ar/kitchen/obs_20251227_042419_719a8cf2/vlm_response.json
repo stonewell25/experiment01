@@ -1,0 +1,63 @@
+{
+  "raw_text": "```json\n{\n  \"detected_regions\": [\n    {\n      \"bbox_2d\": [\n        457,\n        345,\n        508,\n        402\n      ],\n      \"analysis\": {\n        \"category\": \"about to fall\",\n        \"score\": 0.5,\n        \"reason\": \"The knife is positioned near the edge of the table, with the blade extending over the side, making it appear unstable and likely to fall if disturbed.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        470,\n        344,\n        509,\n        400\n      ],\n      \"analysis\": {\n        \"category\": \"about to fall\",\n        \"score\": 0.55,\n        \"reason\": \"The knife is positioned precariously close to the edge of the table, making it unstable and likely to fall.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        462,\n        345,\n        509,\n        402\n      ],\n      \"analysis\": {\n        \"category\": \"about to fall\",\n        \"score\": 0.5,\n        \"reason\": \"The knife is positioned near the edge of the table, with the blade extending over the side, making it appear unstable and likely to fall if disturbed.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        457,\n        345,\n        508,\n        402\n      ],\n      \"analysis\": {\n        \"category\": \"about to fall\",\n        \"score\": 0.5,\n        \"reason\": \"The knife is positioned near the edge of the table, with the blade extending over the side, making it appear unstable and likely to fall if disturbed.\"\n      }\n    }\n  ]\n}\n```",
+  "parsed": {
+    "detected_regions": [
+      {
+        "bbox_2d": [
+          457,
+          345,
+          508,
+          402
+        ],
+        "analysis": {
+          "category": "about to fall",
+          "score": 0.5,
+          "reason": "The knife is positioned near the edge of the table, with the blade extending over the side, making it appear unstable and likely to fall if disturbed."
+        }
+      },
+      {
+        "bbox_2d": [
+          470,
+          344,
+          509,
+          400
+        ],
+        "analysis": {
+          "category": "about to fall",
+          "score": 0.55,
+          "reason": "The knife is positioned precariously close to the edge of the table, making it unstable and likely to fall."
+        }
+      },
+      {
+        "bbox_2d": [
+          462,
+          345,
+          509,
+          402
+        ],
+        "analysis": {
+          "category": "about to fall",
+          "score": 0.5,
+          "reason": "The knife is positioned near the edge of the table, with the blade extending over the side, making it appear unstable and likely to fall if disturbed."
+        }
+      },
+      {
+        "bbox_2d": [
+          457,
+          345,
+          508,
+          402
+        ],
+        "analysis": {
+          "category": "about to fall",
+          "score": 0.5,
+          "reason": "The knife is positioned near the edge of the table, with the blade extending over the side, making it appear unstable and likely to fall if disturbed."
+        }
+      }
+    ]
+  },
+  "model": "gemini-2.5-flash-preview-09-2025",
+  "topic_id": "cluster_0",
+  "timestamp": "2025-12-27T04:24:29",
+  "timestamp_ros": "1766777069.3741484"
+}

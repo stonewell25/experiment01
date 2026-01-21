@@ -1,0 +1,24 @@
+{
+  "raw_text": "```json\n{\n  \"detected_regions\": [\n    {\n      \"bbox_2d\": [\n        286,\n        14,\n        994,\n        965\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.5,\n        \"reason\": \"The table surface has multiple unrelated objects (laptop, book, plant, scissors, small white device) placed on it, indicating a mild state of clutter.\"\n      }\n    }\n  ]\n}\n```",
+  "parsed": {
+    "detected_regions": [
+      {
+        "bbox_2d": [
+          286,
+          14,
+          994,
+          965
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.5,
+          "reason": "The table surface has multiple unrelated objects (laptop, book, plant, scissors, small white device) placed on it, indicating a mild state of clutter."
+        }
+      }
+    ]
+  },
+  "model": "gemini-2.5-flash-preview-09-2025",
+  "topic_id": "cluster_0",
+  "timestamp": "2025-12-27T01:02:13",
+  "timestamp_ros": "1766764933.5478675"
+}

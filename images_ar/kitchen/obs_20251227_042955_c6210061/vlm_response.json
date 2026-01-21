@@ -1,0 +1,37 @@
+{
+  "raw_text": "```json\n{\n  \"detected_regions\": [\n    {\n      \"bbox_2d\": [\n        231,\n        185,\n        508,\n        501\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.85,\n        \"reason\": \"Multiple objects (coffee machines, containers, power strip/cables) are grouped together on a limited surface area (the countertop).\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        642,\n        647,\n        970,\n        805\n      ],\n      \"analysis\": {\n        \"category\": \"about to fall\",\n        \"score\": 0.7,\n        \"reason\": \"A knife is placed on the edge of the table with a significant portion of the blade hanging over the edge, making it unstable and likely to fall.\"\n      }\n    }\n  ]\n}\n```",
+  "parsed": {
+    "detected_regions": [
+      {
+        "bbox_2d": [
+          231,
+          185,
+          508,
+          501
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.85,
+          "reason": "Multiple objects (coffee machines, containers, power strip/cables) are grouped together on a limited surface area (the countertop)."
+        }
+      },
+      {
+        "bbox_2d": [
+          642,
+          647,
+          970,
+          805
+        ],
+        "analysis": {
+          "category": "about to fall",
+          "score": 0.7,
+          "reason": "A knife is placed on the edge of the table with a significant portion of the blade hanging over the edge, making it unstable and likely to fall."
+        }
+      }
+    ]
+  },
+  "model": "gemini-2.5-flash-preview-09-2025",
+  "topic_id": "cluster_0",
+  "timestamp": "2025-12-27T04:30:01",
+  "timestamp_ros": "1766777401.868352"
+}

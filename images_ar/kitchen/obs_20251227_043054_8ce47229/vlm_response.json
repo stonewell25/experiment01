@@ -1,0 +1,63 @@
+{
+  "raw_text": "```json\n{\n  \"detected_regions\": [\n    {\n      \"bbox_2d\": [\n        38,\n        342,\n        606,\n        590\n      ],\n      \"analysis\": {\n        \"category\": \"stacked\",\n        \"score\": 0.9,\n        \"reason\": \"Mugs and cups are stacked on the multi-tiered dish rack.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        684,\n        173,\n        771,\n        388\n      ],\n      \"analysis\": {\n        \"category\": \"stacked\",\n        \"score\": 0.95,\n        \"reason\": \"Plates and bowls are stacked on top of each other on the counter.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        434,\n        107,\n        605,\n        348\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.8,\n        \"reason\": \"Various cleaning bottles and objects are piled up around the sink area.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        289,\n        278,\n        506,\n        359\n      ],\n      \"analysis\": {\n        \"category\": \"about to fall\",\n        \"score\": 0.45,\n        \"reason\": \"A long, thin wooden stick/skewer is leaning precariously in the utensil holder and appears unstable.\"\n      }\n    }\n  ]\n}\n```",
+  "parsed": {
+    "detected_regions": [
+      {
+        "bbox_2d": [
+          38,
+          342,
+          606,
+          590
+        ],
+        "analysis": {
+          "category": "stacked",
+          "score": 0.9,
+          "reason": "Mugs and cups are stacked on the multi-tiered dish rack."
+        }
+      },
+      {
+        "bbox_2d": [
+          684,
+          173,
+          771,
+          388
+        ],
+        "analysis": {
+          "category": "stacked",
+          "score": 0.95,
+          "reason": "Plates and bowls are stacked on top of each other on the counter."
+        }
+      },
+      {
+        "bbox_2d": [
+          434,
+          107,
+          605,
+          348
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.8,
+          "reason": "Various cleaning bottles and objects are piled up around the sink area."
+        }
+      },
+      {
+        "bbox_2d": [
+          289,
+          278,
+          506,
+          359
+        ],
+        "analysis": {
+          "category": "about to fall",
+          "score": 0.45,
+          "reason": "A long, thin wooden stick/skewer is leaning precariously in the utensil holder and appears unstable."
+        }
+      }
+    ]
+  },
+  "model": "gemini-2.5-flash-preview-09-2025",
+  "topic_id": "cluster_0",
+  "timestamp": "2025-12-27T04:31:03",
+  "timestamp_ros": "1766777463.7545772"
+}

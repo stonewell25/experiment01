@@ -1,0 +1,50 @@
+{
+  "raw_text": "```json\n{\n  \"detected_regions\": [\n    {\n      \"bbox_2d\": [\n        286,\n        188,\n        424,\n        322\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.7,\n        \"reason\": \"A cardboard box and some papers are piled up on a low partition/shelf, indicating a cluttered surface.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        784,\n        739,\n        965,\n        965\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.65,\n        \"reason\": \"Cables and an extension cord are lying on the floor near the base of the floor lamp, creating clutter.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        805,\n        295,\n        999,\n        485\n      ],\n      \"analysis\": {\n        \"category\": \"about to fall\",\n        \"score\": 0.55,\n        \"reason\": \"A mug is placed very close to the edge of the table, appearing unstable and likely to fall if bumped.\"\n      }\n    }\n  ]\n}\n```",
+  "parsed": {
+    "detected_regions": [
+      {
+        "bbox_2d": [
+          286,
+          188,
+          424,
+          322
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.7,
+          "reason": "A cardboard box and some papers are piled up on a low partition/shelf, indicating a cluttered surface."
+        }
+      },
+      {
+        "bbox_2d": [
+          784,
+          739,
+          965,
+          965
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.65,
+          "reason": "Cables and an extension cord are lying on the floor near the base of the floor lamp, creating clutter."
+        }
+      },
+      {
+        "bbox_2d": [
+          805,
+          295,
+          999,
+          485
+        ],
+        "analysis": {
+          "category": "about to fall",
+          "score": 0.55,
+          "reason": "A mug is placed very close to the edge of the table, appearing unstable and likely to fall if bumped."
+        }
+      }
+    ]
+  },
+  "model": "gemini-2.5-flash-preview-09-2025",
+  "topic_id": "cluster_0",
+  "timestamp": "2025-12-27T01:06:27",
+  "timestamp_ros": "1766765187.2018743"
+}

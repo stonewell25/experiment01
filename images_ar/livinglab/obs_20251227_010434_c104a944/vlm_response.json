@@ -1,0 +1,63 @@
+{
+  "raw_text": "```json\n{\n  \"detected_regions\": [\n    {\n      \"bbox_2d\": [\n        690,\n        286,\n        999,\n        747\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.9,\n        \"reason\": \"The floor is cluttered with various cables, power strips, and a vacuum cleaner.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        733,\n        642,\n        999,\n        999\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.85,\n        \"reason\": \"The area behind and around the TV stand is cluttered with numerous tangled cables and wires.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        299,\n        664,\n        896,\n        902\n      ],\n      \"analysis\": {\n        \"category\": \"about to fall\",\n        \"score\": 0.35,\n        \"reason\": \"The large TV screen is mounted on a stand and appears top-heavy, suggesting a slight instability, though it is designed to stand.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        790,\n        673,\n        877,\n        901\n      ],\n      \"analysis\": {\n        \"category\": \"stacked\",\n        \"score\": 0.9,\n        \"reason\": \"The TV stand consists of multiple shelves stacked vertically.\"\n      }\n    }\n  ]\n}\n```",
+  "parsed": {
+    "detected_regions": [
+      {
+        "bbox_2d": [
+          690,
+          286,
+          999,
+          747
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.9,
+          "reason": "The floor is cluttered with various cables, power strips, and a vacuum cleaner."
+        }
+      },
+      {
+        "bbox_2d": [
+          733,
+          642,
+          999,
+          999
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.85,
+          "reason": "The area behind and around the TV stand is cluttered with numerous tangled cables and wires."
+        }
+      },
+      {
+        "bbox_2d": [
+          299,
+          664,
+          896,
+          902
+        ],
+        "analysis": {
+          "category": "about to fall",
+          "score": 0.35,
+          "reason": "The large TV screen is mounted on a stand and appears top-heavy, suggesting a slight instability, though it is designed to stand."
+        }
+      },
+      {
+        "bbox_2d": [
+          790,
+          673,
+          877,
+          901
+        ],
+        "analysis": {
+          "category": "stacked",
+          "score": 0.9,
+          "reason": "The TV stand consists of multiple shelves stacked vertically."
+        }
+      }
+    ]
+  },
+  "model": "gemini-2.5-flash-preview-09-2025",
+  "topic_id": "cluster_0",
+  "timestamp": "2025-12-27T01:04:42",
+  "timestamp_ros": "1766765082.6393995"
+}

@@ -1,0 +1,50 @@
+{
+  "raw_text": "```json\n{\n  \"detected_regions\": [\n    {\n      \"bbox_2d\": [\n        739,\n        147,\n        999,\n        358\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.9,\n        \"reason\": \"Crumpled papers are scattered on the desk surface, indicating a cluttered state.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        690,\n        383,\n        970,\n        644\n      ],\n      \"analysis\": {\n        \"category\": \"cluttered\",\n        \"score\": 0.75,\n        \"reason\": \"An open book and papers are spread out on the desk along with other items, contributing to the clutter.\"\n      }\n    },\n    {\n      \"bbox_2d\": [\n        542,\n        138,\n        749,\n        229\n      ],\n      \"analysis\": {\n        \"category\": \"stacked\",\n        \"score\": 0.85,\n        \"reason\": \"Two books are stacked on top of each other, leaning against the wall.\"\n      }\n    }\n  ]\n}\n```",
+  "parsed": {
+    "detected_regions": [
+      {
+        "bbox_2d": [
+          739,
+          147,
+          999,
+          358
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.9,
+          "reason": "Crumpled papers are scattered on the desk surface, indicating a cluttered state."
+        }
+      },
+      {
+        "bbox_2d": [
+          690,
+          383,
+          970,
+          644
+        ],
+        "analysis": {
+          "category": "cluttered",
+          "score": 0.75,
+          "reason": "An open book and papers are spread out on the desk along with other items, contributing to the clutter."
+        }
+      },
+      {
+        "bbox_2d": [
+          542,
+          138,
+          749,
+          229
+        ],
+        "analysis": {
+          "category": "stacked",
+          "score": 0.85,
+          "reason": "Two books are stacked on top of each other, leaning against the wall."
+        }
+      }
+    ]
+  },
+  "model": "gemini-2.5-flash-preview-09-2025",
+  "topic_id": "cluster_0",
+  "timestamp": "2025-12-27T01:02:34",
+  "timestamp_ros": "1766764954.2050128"
+}
