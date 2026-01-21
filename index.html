@@ -684,39 +684,30 @@
 
         // Kitchen の画像
         const kitchenImages = [
-            'images_ar/kitchen/mozaiku_obs_20251227_041959_cc1d2e36/rgb.jpg',
-            'images_ar/kitchen/mozaiku_obs_20251227_042101_ff99bb47/rgb.jpg',
             'images_ar/kitchen/obs_20251227_042419_719a8cf2/rgb.jpg',
-            'images_ar/kitchen/obs_20251227_042955_c6210061/rgb.jpg',
-            'images_ar/kitchen/obs_20251227_043054_8ce47229/rgb.jpg',
-            'images_ar/kitchen/obs_20251227_043202_a371e222/rgb.jpg'
+            'images_ar/kitchen/obs_20251227_043122_186377bf/rgb.jpg'
         ];
 
         // Livinglab の画像
         const livinglabImages = [
-            'images_ar/livinglab/obs_20251227_005248_bebad969/rgb.jpg',
             'images_ar/livinglab/obs_20251227_010207_e5edc8f5/rgb.jpg',
-            'images_ar/livinglab/obs_20251227_010225_4f95f5a5/rgb.jpg',
             'images_ar/livinglab/obs_20251227_010434_c104a944/rgb.jpg',
-            'images_ar/livinglab/モザイク入れるobs_20251227_010620_bf674b97/rgb.jpg',
-            'images_ar/livinglab/obs_20251227_010932_db273de0/rgb.jpg'
+            'images_ar/livinglab/obs_20260121_171001_4ddec0ab/rgb.jpg',
+            'images_ar/livinglab/obs_20260121_164727_a6e7e45c/rgb.jpg',
+            'images_ar/livinglab/obs_20251227_010620_bf674b97/rgb.jpg'
         ];
 
-        // NYUデータセットからランダムに10枚を選択する関数
-        function generateNyuImages() {
-            const totalNyuImages = 1449;
-            const selectedIndices = [];
-            while (selectedIndices.length < 10) {
-                const randomIndex = Math.floor(Math.random() * totalNyuImages);
-                if (!selectedIndices.includes(randomIndex)) {
-                    selectedIndices.push(randomIndex);
-                }
-            }
-            return selectedIndices.map(idx => {
-                const paddedIdx = String(idx).padStart(5, '0');
-                return `images_ar/nyu_exported_images/rgb/nyu_${paddedIdx}.png`;
-            });
-        }
+        // NYU の画像（リスクなし確認用）
+        const nyuImages = [
+            'images_ar/nyu_exported_images/rgb/nyu_00409.png', //おもちゃりすく
+            'images_ar/nyu_exported_images/rgb/nyu_00422.png', //おもちゃりすく
+            'images_ar/nyu_exported_images/rgb/nyu_00446.png',//おもちゃりすく
+            'images_ar/nyu_exported_images/rgb/nyu_00478.png',
+            'images_ar/nyu_exported_images/rgb/nyu_00449.png',
+            'images_ar/nyu_exported_images/rgb/nyu_00469.png',
+            'images_ar/nyu_exported_images/rgb/nyu_00819.png'
+        ];
+
 
         // 6つのリスクカテゴリ
         const riskCategories = [
@@ -734,11 +725,11 @@
             welcome_intro: { ja: "この実験にご協力いただき、ありがとうございます。以下の説明をよくお読みの上、ご参加ください。", en: "Thank you for participating in this experiment. Please read the instructions below carefully before you begin." },
             overview_title: { ja: "実験の概要", en: "Experiment Overview" },
             overview_list: {
-                ja: `<li>最初に練習セッション（4枚）があり、その後に本番セッション（22枚）があります。</li>
+                ja: `<li>最初に練習セッション（4枚）があり、その後に本番セッション（13枚）があります。</li>
                      <li>各画像について、6つのリスクカテゴリについてリスクが「ある」か確認してください。</li>
                      <li>リスクが「ある」と判断した場合、そのリスク箇所を自由な形で囲んでいただきます。</li>
                      <li>リスクがない場合は「リスクはない」を選択してください。</li>`,
-                en: `<li>There will be a practice session (4 images) followed by the main session (22 images).</li>
+                en: `<li>There will be a practice session (4 images) followed by the main session (13 images).</li>
                      <li>For each image, check if there is a risk for any of the 6 categories.</li>
                      <li>If you identify a risk, you will draw a freeform shape around the risky area.</li>
                      <li>If there is no risk, select "No risk".</li>`
@@ -746,13 +737,13 @@
             risk_explanation_title: { ja: "リスクカテゴリの説明", en: "Risk Category Explanations" },
 
             risk_fire: { ja: "火事", en: "Fire" },
-            risk_fire_desc: { ja: "火災が発生する可能性があるリスク。コンロの近くに可燃物がある、電気配線の問題など。", en: "Risk of fire occurring. Flammable materials near stove, electrical wiring issues, etc." },
+            risk_fire_desc: { ja: "火災が発生する可能性があるリスク。コンロの近くに可燃物があるなど。", en: "Risk of fire occurring. Flammable materials near stove, electrical wiring issues, etc." },
 
             risk_burn: { ja: "火傷", en: "Burn" },
-            risk_burn_desc: { ja: "熱いものに触れて火傷する可能性があるリスク。熱いやかん、コンロ、アイロンなど。", en: "Risk of getting burned by hot objects. Hot kettle, stove, iron, etc." },
+            risk_burn_desc: { ja: "熱いものに触れて火傷する可能性があるリスク。やかんなど", en: "Risk of getting burned by hot objects. Hot kettle, stove, iron, etc." },
 
             risk_ingestion: { ja: "誤飲", en: "Ingestion" },
-            risk_ingestion_desc: { ja: "小さな物体や危険な液体を誤って飲み込む可能性があるリスク。小さな部品、洗剤、薬品など。", en: "Risk of accidentally swallowing small objects or dangerous liquids. Small parts, detergents, chemicals, etc." },
+            risk_ingestion_desc: { ja: "小さな物体や危険な液体を誤って飲み込む可能性があるリスク。おもちゃ、洗剤、薬品など。", en: "Risk of accidentally swallowing small objects or dangerous liquids. Small parts, detergents, chemicals, etc." },
 
             risk_fall: { ja: "転倒", en: "Fall" },
             risk_fall_desc: { ja: "つまずいたり滑ったりして転倒する可能性があるリスク。床の障害物、濡れた床、ケーブルなど。", en: "Risk of tripping or slipping. Floor obstacles, wet floor, cables, etc." },
@@ -929,7 +920,6 @@
 
             // 画像リストを構築
             practiceImageList = [...practiceImages];
-            const nyuImages = generateNyuImages();
             mainImageList = [...kitchenImages, ...livinglabImages, ...nyuImages];
 
             startScreen.style.display = 'none';
