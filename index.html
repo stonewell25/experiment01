@@ -708,6 +708,9 @@
             'images_ar/nyu_exported_images/rgb/nyu_00819.png'
         ];
 
+        // ★★★ Google Apps Script URL ★★★
+        // デプロイ後のウェブアプリURLをここに貼り付けてください
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbwlLqI4LcFQ1eI0_aoMRHk1qrjsE4LdbsdUzXw0CZ6WF8yoZCDn8koCbgX-5jgzjYvc/exec';
 
         // 6つのリスクカテゴリ
         const riskCategories = [
@@ -792,6 +795,7 @@
             confirm_no: { ja: "いいえ", en: "No" },
             status_saving: { ja: "データを保存中...", en: "Saving data..." },
             status_save_complete: { ja: "保存完了。次の画像に進みます。", en: "Save complete. Proceeding to next image." },
+            status_save_error: { ja: "エラー：データの保存に失敗しました。", en: "Error: Failed to save data." },
             status_practice_complete: { ja: "練習完了。次の画像に進みます。", en: "Practice complete. Proceeding to the next image." }
         };
 
@@ -1422,10 +1426,76 @@
                 };
             });
 
+            // ローカル保存用に結果を追加
             allResults.push(result);
 
-            instruction.textContent = translations.status_save_complete[currentLang];
-            resetForNextImage(1500);
+            // サーバー送信
+            saveDataToServer(result);
+        }
+
+        function saveDataToServer(result) {
+            // GAS URLがセットされていない場合はスキップ
+            if (!GAS_URL || GAS_URL === 'YOUR_GAS_URL_HERE') {
+                console.log('GAS URL not configured, skipping server upload');
+                instruction.textContent = translations.status_save_complete[currentLang];
+                resetForNextImage(1500);
+                return;
+            }
+
+            // 描画付き画像を取得
+            const dataToSend = {
+                ...result,
+                imageDataUrl: getAnnotatedImageDataUrl()
+            };
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dataToSend)
+            })
+                .then(() => {
+                    instruction.textContent = translations.status_save_complete[currentLang];
+                })
+                .catch(error => {
+                    console.error('Data submission failed:', error);
+                    instruction.textContent = translations.status_save_error
+                        ? translations.status_save_error[currentLang]
+                        : 'Error saving data';
+                })
+                .finally(() => {
+                    resetForNextImage(1500);
+                });
+        }
+
+        function getAnnotatedImageDataUrl() {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = mainImage.naturalWidth;
+            tempCanvas.height = mainImage.naturalHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            // 元画像を描画
+            tempCtx.drawImage(mainImage, 0, 0);
+
+            // 描画パスを描画
+            tempCtx.strokeStyle = 'lime';
+            tempCtx.lineWidth = 5;
+            tempCtx.fillStyle = 'rgba(0, 255, 0, 0.2)';
+
+            drawnPaths.forEach(drawing => {
+                if (drawing.path.length < 2) return;
+
+                tempCtx.beginPath();
+                tempCtx.moveTo(drawing.path[0].x, drawing.path[0].y);
+                for (let i = 1; i < drawing.path.length; i++) {
+                    tempCtx.lineTo(drawing.path[i].x, drawing.path[i].y);
+                }
+                tempCtx.closePath();
+                tempCtx.stroke();
+                tempCtx.fill();
+            });
+
+            return tempCanvas.toDataURL('image/png');
         }
 
         function resetForNextImage(delay) {
